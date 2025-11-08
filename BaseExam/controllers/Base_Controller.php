@@ -28,7 +28,7 @@ class Base_Controller
     public $departurescheduleModel;
     public $imgtourModel;
     public $payModel;
-    public $PolicyModel;
+    public $policyModel;
     public $rollcallModel;
     public $specialrequestModel;
     public $supplierModel;
