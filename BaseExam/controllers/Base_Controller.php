@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../models/Address_Model.php';
 require_once __DIR__ . '/../models/Book_tour_Model.php';
-require_once __DIR__ . '/../models/Chat_Model.php';
+require_once __DIR__ . '/../models/Contract_Model.php';
 require_once __DIR__ . '/../models/Customer_list_Model.php';
 require_once __DIR__ . '/../models/Departure_schedule_Model.php';
 require_once __DIR__ . '/../models/Img_tour_Model.php';
@@ -23,7 +23,7 @@ class Base_Controller
 {
     public $addressModel;
     public $booktourModel;
-    public $chatModel;
+    public $contractModel;
     public $customerlistModel;
     public $departurescheduleModel;
     public $imgtourModel;
@@ -42,7 +42,7 @@ class Base_Controller
     public function __construct() {
         $this->addressModel            = new Address_Model();
         $this->booktourModel           = new Book_tour_Model();
-        $this->chatModel               = new Chat_Model();
+        $this->contractModel           = new Contract_Model();
         $this->customerlistModel       = new Customer_list_Model();
         $this->departurescheduleModel  = new Departure_schedule_Model();
         $this->imgtourModel            = new Img_tour_Model();
@@ -56,7 +56,7 @@ class Base_Controller
         $this->tourModel               = new Tour_Model();
         $this->toursupplierModel       = new Tour_supplier_Model();
         $this->tourtypeModel           = new Tour_type_Model();
-        $this->userModel               = new User_Model();
+        $this->userModel              = new User_Model();
     }
 
 }

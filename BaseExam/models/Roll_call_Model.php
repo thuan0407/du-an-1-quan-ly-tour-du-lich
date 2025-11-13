@@ -1,7 +1,7 @@
 <?php
  class Roll_call{
     public $id;
-    public $id_book_tour ;
+    public $id_departure_schedule;
     public $status;
     public $date;
     public $note;
