@@ -8,6 +8,7 @@
     public $date;
     public $id_typetour ;
     public $id_user;
+    public $scope;
  }
 
 

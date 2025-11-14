@@ -1,5 +1,4 @@
 <?php require_once 'navbar.php'; ?>
-<div class="content-wrapper">
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -8,7 +7,7 @@
   <title>Navbar Offcanvas - Quản lý Tour</title>
 </head>
 <body>
-
+<div class="content-wrapper">
  
   <!-- Nội dung chính -->
   <div class="container mt-4">

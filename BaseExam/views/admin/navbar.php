@@ -73,7 +73,7 @@
       <button id="sidebarToggle" class="btn btn-outline-light">
         <i class="fa-solid fa-bars"></i>
       </button>
-      <a class="navbar-brand ms-2" href="?action=home_admin">Quản lý Tour</a>
+      <a class="navbar-brand ms-2" href="?action=home_admin">Hệ thống quản lý</a>
 
       <!-- Search bar -->
       <form class="d-flex ms-auto" role="search">
@@ -85,9 +85,9 @@
 
   <!-- Sidebar -->
   <div id="sidebar">
-    <h4 class="px-3 pt-3">Quản lý Tour</h4>
-    <a href="#"><i class="fa-solid fa-users"></i> Quản lý nhân sự</a>
-    <a href="#"><i class="fa-solid fa-map-location-dot"></i> Quản lý danh mục tour</a>
+    <h4> <a href="?action=home_admin" class="px-3 pt-3">Home</a></h4>
+    <a href="?action=tour_catalog_management"><i class="fa-solid fa-map-location-dot"></i> Quản lý danh mục tour</a>
+    <a href="?action=human_resource_management"><i class="fa-solid fa-users"></i> Quản lý nhân sự</a>
     <a href="#"><i class="fa-solid fa-ticket"></i> Quản lý tour</a>
     <a href="#"><i class="fa-solid fa-ticket"></i> Quản lý nhà cung cấp</a>
     <a href="#"><i class="fa-solid fa-ticket"></i> Quản lý đặt tour</a>
@@ -100,16 +100,16 @@
       <div class="collapse ps-3 mt-2" id="accountMenu">
         <a href="?action=login_admin">Đăng nhập</a>
         <a href="?action=guide_registration">Đăng ký</a>
-        <a href="#">Đăng xuất</a>
+        <a href="?action=logout_admin" onclick="return confim('Bạn có chắc là muốn Đăng xuất không?')">Đăng xuất</a>
       </div>
     </div>
   </div>
 
 
   <!-- Wrapper cho nội dung trang -->
-  <div class="content-wrapper">
-    <!-- Nội dung trang sẽ được include ở đây -->
-  </div>
+  <!-- <div class="content-wrapper">
+    Nội dung trang sẽ được include ở đây
+  </div> -->
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
