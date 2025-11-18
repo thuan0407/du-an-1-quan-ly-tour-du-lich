@@ -10,7 +10,7 @@
 
   <!-- Bootstrap & Font Awesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/a2e0b1f2aa.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <style>
 
@@ -88,7 +88,7 @@
     <h4> <a href="?action=home_admin" class="px-3 pt-3">Home</a></h4>
     <a href="?action=tour_catalog_management"><i class="fa-solid fa-map-location-dot"></i> Quản lý danh mục tour</a>
     <a href="?action=human_resource_management"><i class="fa-solid fa-users"></i> Quản lý nhân sự</a>
-    <a href="#"><i class="fa-solid fa-ticket"></i> Quản lý tour</a>
+    <a href="?action=tour_manager"><i class="fa-solid fa-ticket"></i> Quản lý tour</a>
     <a href="#"><i class="fa-solid fa-ticket"></i> Quản lý nhà cung cấp</a>
     <a href="#"><i class="fa-solid fa-ticket"></i> Quản lý đặt tour</a>
 
@@ -113,6 +113,7 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
 
   <!-- JS điều khiển sidebar -->
   <script>

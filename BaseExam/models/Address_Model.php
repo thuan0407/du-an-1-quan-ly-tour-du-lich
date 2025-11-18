@@ -7,6 +7,8 @@ class Address{
 }
 class Address_Model extends BaseModel{
 
+    protected $table = "address";
+
         public function all(){//hiện toàn bộ thông tin
             try{
                 $sql="SELECT * FROM `address`";
@@ -26,5 +28,25 @@ class Address_Model extends BaseModel{
             echo "Lỗi truy vấn sản phẩm: " . $err->getMessage();
         }
         }
+
+    public function insert($data) {
+        $sql = "INSERT INTO address (name, status, id_tour) VALUES (:name, :status, :id_tour)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':name' => $data['name'],
+            ':status' => $data['status'],
+            ':id_tour' => $data['id_tour']
+        ]);
+        return $this->pdo->lastInsertId();
+    }
+
+    public function delete_address($tour_id){
+        $sql="DELETE FROM address WHERE id_tour = :tour_id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt-> execute(['tour_id'=>$tour_id]);
+        return $stmt;
+    }
+
+
 }
 ?>

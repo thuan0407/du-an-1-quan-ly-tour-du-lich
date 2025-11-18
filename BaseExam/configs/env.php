@@ -1,6 +1,6 @@
 <?php
 
-define('BASE_URL',          'http://localhost/d%e1%bb%b1%20%c3%a1n%201/BaseExam/');
+define('BASE_URL',          'http://localhost/du_an_1/BaseExam/');
 
 define('PATH_ROOT',         __DIR__ . '/../');
 
@@ -9,6 +9,8 @@ define('PATH_VIEW',         PATH_ROOT . 'views/');
 define('PATH_VIEW_MAIN',    PATH_ROOT . 'views/main.php');
 
 define('BASE_ASSETS_UPLOADS',   BASE_URL . 'assets/uploads/');
+
+define('BASE_ASSETS_UPLOADSD',   BASE_URL . 'uploads/tour/');
 
 define('PATH_ASSETS_UPLOADS',   PATH_ROOT . 'assets/uploads/');
 

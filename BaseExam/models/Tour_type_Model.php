@@ -38,7 +38,7 @@ class Tour_type_Model extends BaseModel{
         }
         }
 
-    public function delete_tour_tour($id){        //thêm danh mục
+    public function delete_tour_tour($id){      
             try{
                 $sql="DELETE FROM tour_type WHERE `tour_type`.`id` = $id";
                 $data=$this->pdo->exec($sql);
@@ -76,7 +76,17 @@ class Tour_type_Model extends BaseModel{
             }catch (PDOException $err) {
             echo "Lỗi truy vấn sản phẩm: " . $err->getMessage();
         }
-        }
+        }    
+    public function delete_tour($tour_id){      
+            try{
+                $sql="DELETE FROM tour WHERE id_loai_tour = $tour_id 
+                DELETE FROM loai_tour WHERE id = $tour_id;";
+                $data=$this->pdo->exec($sql);
+                return $data;
 
+            }catch (PDOException $err) {
+            echo "Lỗi truy vấn sản phẩm: " . $err->getMessage();
+        }
+        }
 }
 ?>
