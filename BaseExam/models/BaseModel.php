@@ -24,14 +24,4 @@ class BaseModel
         $this->pdo = null;
     }
 
-    public function insert($data) {
-    $keys = implode(",", array_keys($data));
-    $values = ":" . implode(",:", array_keys($data));
-
-    $sql = "INSERT INTO {$this->table} ($keys) VALUES ($values)";
-    $stmt = $this->pdo->prepare($sql);
-    $stmt->execute($data);
-
-    return $this->pdo->lastInsertId();
-}
 }

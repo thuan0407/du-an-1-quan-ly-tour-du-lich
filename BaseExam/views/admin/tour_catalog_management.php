@@ -1,4 +1,12 @@
-<?php require_once 'navbar.php'; ?>
+<?php require_once 'navbar.php'; 
+if(isset($_GET['msg'])){
+    if($_GET['msg'] === "success"){
+        $success ="Thành công";
+    }else if($_GET['msg'] === "error"){
+        $error = "Thất bại";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,6 +23,14 @@
         <span  style="color:green; margin-left:10px;"><?=$success?></span>
         <span  style="color:red; margin-left:10px;">  <?=$err?></span>
       </form>
+
+      <?php if(!empty($success)):?>
+        <div class="alert alert-success"><?= htmlspecialchars($success)?></div>
+        <?php endif; ?>
+
+      <?php if(!empty($error)):?>
+        <div class="alert alert-danger"><?=htmlspecialchars($error)?></div>
+        <?php endif; ?>
     <table class="table">
   <thead>
     <tr>

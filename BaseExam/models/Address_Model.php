@@ -29,16 +29,16 @@ class Address_Model extends BaseModel{
         }
         }
 
-    public function insert($data) {
-        $sql = "INSERT INTO address (name, status, id_tour) VALUES (:name, :status, :id_tour)";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            ':name' => $data['name'],
-            ':status' => $data['status'],
-            ':id_tour' => $data['id_tour']
-        ]);
-        return $this->pdo->lastInsertId();
-    }
+    public function insert($data){
+    $sql = "INSERT INTO address (name, status, id_tour) VALUES (:name, :status, :id_tour)";
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->execute([
+        ':name'    => $data['name'],        // tên địa điểm
+        ':status'  => $data['status'] ?? 1, // mặc định 1 nếu chưa có
+        ':id_tour' => $data['id_tour']      // id tour vừa tạo
+    ]);
+    return $this->pdo->lastInsertId();
+}
 
     public function delete_address($tour_id){
         $sql="DELETE FROM address WHERE id_tour = :tour_id";
@@ -47,6 +47,17 @@ class Address_Model extends BaseModel{
         return $stmt;
     }
 
+    public function find_address($id){
+        $sql = "SELECT * FROM address WHERE id_tour = :id ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id'=>$id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+     public function update($id, $name) {
+        $stmt = $this->pdo->prepare("UPDATE addresses SET name = ? WHERE id = ?");
+        return $stmt->execute([$name, $id]);
+    }
 
 }
 ?>

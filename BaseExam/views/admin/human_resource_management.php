@@ -1,5 +1,14 @@
 <?php require_once 'navbar.php';
 
+$success = "";
+$error = "";
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] === 'success') {
+        $success = " Thành công!";
+    } elseif ($_GET['msg'] === 'error') {
+        $error = "Thất bại!";
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,7 +19,7 @@
 </head>
 <body>
     <div class="content-wrapper">
-        <h1>QUẢN LÝ NHÂN SỰ</h1>
+        <h1>QUẢN LÝ HƯỚNG DẪN VIÊN</h1>
         <!-- Tìm kiếm hướng dẫn viên -->
             <form action="index.php" method="get" enctype="multipart/form-data" class="d-flex align-items-center gap-2 mb-3 " style="margin:0 100px">
                 <input type="text" name="key_word" class="form-control" placeholder="Nhập từ khóa tìm kiếm...">
@@ -18,13 +27,23 @@
                 <input type="hidden" name="action" value="search_tour_guide">
                 <span style="color:red;"><?=$notification?></span>
             </form>
+
+        <!-- Thông báo -->
+        <?php if(!empty($success)):?>
+            <div class="alert alert-success"><?=htmlspecialchars($success)?></div>
+            <?php endif;?>
+
+        <?php if(!empty($error)):?>
+            <div class="alert alert-danger"><?=htmlspecialchars($error)?></div>
+            <?php endif; ?>
+
         <div class="container" style="display:flex;">
             <form action="index.php" method="get">
                 <!-- Lọc theo khu vực -->
                 <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
                 <label>Khu vực:</label>
                 <select name="type_guide" class="form-control mb-3" onchange="this.form.submit()">
-                    <option value="" <?= !isset($_GET['type_guide']) ? 'selected' : '' ?>>Chọn khu vực</option>
+                    <option value="" <?= !isset($_GET['type_guide']) ? 'selected' : '' ?>>--Chọn khu vực--</option>
                     <option value="nội địa" <?= (isset($_GET['type_guide']) && $_GET['type_guide']=='nội địa') ? 'selected' : '' ?>>Nội địa</option>
                     <option value="ngoại địa" <?= (isset($_GET['type_guide']) && $_GET['type_guide']=='ngoại địa') ? 'selected' : '' ?>>Ngoại địa</option>
                 </select>
@@ -32,7 +51,7 @@
                 <!-- Lọc theo ngôn ngữ -->
                 <label>Ngôn ngữ:</label>
                 <select name="foreign_languages" class="form-control mb-3" onchange="this.form.submit()">
-                    <option value="" <?= !isset($_GET['foreign_languages']) ? 'selected' : '' ?>>Chọn ngôn ngữ</option>
+                    <option value="" <?= !isset($_GET['foreign_languages']) ? 'selected' : '' ?>>--Chọn ngôn ngữ--</option>
                     <?php foreach($list as $tt): ?>
                         <option value="<?= htmlspecialchars($tt->foreign_languages) ?>" 
                             <?= (isset($_GET['foreign_languages']) && $_GET['foreign_languages'] === $tt->foreign_languages) ? 'selected' : '' ?>>
@@ -123,14 +142,17 @@
                     </div>
         </div>
         <table class="table">
-            <thead>
-                <th>STT</th>
-                <th>Họ và tên</th>
-                <th>eamil</th>
-                <th>loại HDV</th>
-                <th>Năm kinh nghiệm</th>
-                <th>Ảnh</th>
-                <th>Hành động</th>
+            <thead class="table table primary">
+                <tr>
+                    <th>STT</th>
+                    <th>Họ và tên</th>
+                    <th>eamil</th>
+                    <th>loại HDV</th>
+                    <th>Năm kinh nghiệm</th>
+                    <th>Ảnh</th>
+                    <th>Hành động</th>
+
+                </tr>
             </thead>
 
             <tbody>

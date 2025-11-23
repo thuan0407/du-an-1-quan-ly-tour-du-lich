@@ -19,7 +19,7 @@ require_once __DIR__ . '/../models/User_Model.php';
 
 
 
-class Base_Controller
+class Base_Controller 
 {
     public $addressModel;
     public $booktourModel;
