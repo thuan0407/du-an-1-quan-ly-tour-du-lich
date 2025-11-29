@@ -16,6 +16,7 @@ require_once __DIR__ . '/../models/Tour_Model.php';
 require_once __DIR__ . '/../models/Tour_supplier_Model.php';
 require_once __DIR__ . '/../models/Tour_type_Model.php';
 require_once __DIR__ . '/../models/User_Model.php';
+require_once __DIR__ . '/../models/Departure_schedule_details.php';
 
 
 
@@ -38,6 +39,7 @@ class Base_Controller
     public $toursupplierModel;
     public $tourtypeModel;
     public $userModel;
+    public $departurescheduledetailsModel;
 
     public function __construct() {
         $this->addressModel            = new Address_Model();
@@ -56,7 +58,8 @@ class Base_Controller
         $this->tourModel               = new Tour_Model();
         $this->toursupplierModel       = new Tour_supplier_Model();
         $this->tourtypeModel           = new Tour_type_Model();
-        $this->userModel              = new User_Model();
+        $this->userModel               = new User_Model();
+        $this->departurescheduledetailsModel  = new Departure_schedule_details_Model();
     }
 
 }

@@ -11,7 +11,7 @@
     <div class="content-wrapper">
         <h1>Trang chi tiết và sửa</h1>
         <form action="" method="post" enctype="multipart/form-data">
-            <div class="row">
+            <div class="row" d-flex>
                 <div class="col">
                     <div class="mb-3">
                         <label>Ảnh tour</label>
@@ -26,6 +26,16 @@
                     <div class="mb-3">
                         <label for="">Tên tour</label>
                         <input type="text" name="name" value="<?=$tour_detail->name?>"class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="">Khu vực</label>
+                        <select name="type_tour" class="form-control">
+                            <option value="1" <?= $tour_detail->type_tour == 1 ? 'selected' : '' ?>>Nội địa</option>
+                            <option value="2" <?= $tour_detail->type_tour == 2 ? 'selected' : '' ?>>Ngoại địa</option>
+                        </select>
+                    </div>
+
                     </div>
                     
                     <div class="mb-3">
@@ -68,6 +78,7 @@
                 </div>
 
                 <div class="col">
+                    <div>
                     <div class="mb-3">
                         <label for="">Loại tour</label>
                         <select name="id_tourtype" class="form-control">
@@ -124,6 +135,7 @@
         
             </div>
         
+        </div>
         </div>
 
 

@@ -87,13 +87,15 @@
   <div id="sidebar">
     <h4> <a href="?action=home_admin" class="px-3 pt-3">Home</a></h4>
     <a href="?action=tour_catalog_management"><i class="fa-solid fa-map-location-dot"></i> Quản lý danh mục tour</a>
+    <a href="?action=supplier_management"><i class="fa-solid fa-ticket"></i> Quản lý nhà cung cấp</a>
     <a href="?action=human_resource_management"><i class="fa-solid fa-users"></i> Quản lý hướng dẫn viên</a>
     <a href="?action=tour_manager_content"><i class="fa-solid fa-ticket"></i> Quản lý tour</a>
-    <a href="?action=supplier_management"><i class="fa-solid fa-ticket"></i> Quản lý nhà cung cấp</a>
-    <a href="?action=booking_content"><i class="fa-solid fa-ticket"></i> Quản lý đặt tour</a>
+    <a href="?action=booking_tour"><i class="fa-solid fa-ticket"></i> Quản lý đặt tour</a>
+    <hr>
+    <a href="?action=logout_admin" onclick="return confim('Bạn có chắc là muốn Đăng xuất không?')">Đăng xuất</a>
 
     <!-- Dropdown tài khoản -->
-    <div class="mt-3 px-3">
+    <!-- <div class="mt-3 px-3">
       <a class="dropdown-toggle text-white text-decoration-none" data-bs-toggle="collapse" href="#accountMenu">
         <i class="fa-solid fa-user"></i> Tài khoản
       </a>
@@ -102,7 +104,7 @@
         <a href="?action=guide_registration">Đăng ký</a>
         <a href="?action=logout_admin" onclick="return confim('Bạn có chắc là muốn Đăng xuất không?')">Đăng xuất</a>
       </div>
-    </div>
+    </div> -->
   </div>
 
 

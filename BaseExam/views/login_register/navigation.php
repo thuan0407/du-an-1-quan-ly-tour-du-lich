@@ -27,7 +27,7 @@
 <body>
     <h2>
         <a href="?action=login_admin">Đăng nhập phía người dùng và admin</a> <br>
-        <a href="?action=home_guide">Trang hướng dẫn viên</a><br>
+        <a href="?action=guide_login">Trang hướng dẫn viên</a><br>
     </h2>
 </body>
 </html>

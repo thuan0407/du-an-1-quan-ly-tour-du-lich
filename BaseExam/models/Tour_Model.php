@@ -260,7 +260,8 @@ public function getToursShort() {                                               
                         `id_tourtype` = '".$tour->id_tourtype."', 
                         `scope` = '".$tour->scope."', 
                         `number_of_nights` = '".$tour->number_of_nights."',
-                        `status` = '".$tour->status."'
+                        `status` = '".$tour->status."',
+                        `type_tour` = '".$tour->type_tour."'
                         WHERE `tour`.`id` = $id;";
                     $data=$this->pdo->exec($sql);
                     return $data;
@@ -303,8 +304,9 @@ public function getToursShort() {                                               
             return array_values($tours);
         } catch(PDOException $err) {
             echo "Lỗi truy vấn tour: " . $err->getMessage();
-            return [];
+            return [];  
         }
     }
+
 }
 ?>

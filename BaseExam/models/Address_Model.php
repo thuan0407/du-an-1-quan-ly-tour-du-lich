@@ -59,5 +59,12 @@ class Address_Model extends BaseModel{
         return $stmt->execute([$name, $id]);
     }
 
+    public function get_address($id){
+        $sql = "SELECT name FROM address WHERE id_tour = :id ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id'=>$id]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
 }
 ?>

@@ -50,15 +50,16 @@ if (isset($_GET['msg'])) {
 
                 <!-- Lọc theo ngôn ngữ -->
                 <label>Ngôn ngữ:</label>
-                <select name="foreign_languages" class="form-control mb-3" onchange="this.form.submit()">
-                    <option value="" <?= !isset($_GET['foreign_languages']) ? 'selected' : '' ?>>--Chọn ngôn ngữ--</option>
-                    <?php foreach($list as $tt): ?>
-                        <option value="<?= htmlspecialchars($tt->foreign_languages) ?>" 
-                            <?= (isset($_GET['foreign_languages']) && $_GET['foreign_languages'] === $tt->foreign_languages) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($tt->foreign_languages) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                    <select name="foreign_languages" class="form-control mb-3" onchange="this.form.submit()">
+                        <option value="">--Chọn ngôn ngữ--</option>
+                        <?php foreach($list_languages as $lang): ?>
+                            <option value="<?= htmlspecialchars($lang) ?>" 
+                                <?= (isset($_GET['foreign_languages']) && $_GET['foreign_languages'] === $lang) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($lang) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+
                 </div>
                 <input type="hidden" name="action" value="human_resource_management">
             </form>
@@ -107,8 +108,8 @@ if (isset($_GET['msg'])) {
                                             <label for="">Khu vực:</label>
                                             <select name="type_guide" id=""required class="form-control">
                                                 <option value="" disabled></option>
-                                                <option value="nội địa">Nội địa</option>
-                                                <option value="ngoại địa">Ngoại địa</option>
+                                                <option value="1">Nội địa</option>
+                                                <option value="2">Ngoại địa</option>
                                             </select>
                                         </div>
                                         <div class="mb-3">
@@ -233,8 +234,8 @@ if (isset($_GET['msg'])) {
                                                                     <label for="">Khu vực:</label>
                                                                     <select name="type_guide" id=""required class="form-control" value="<?=$tt->type_guide?>">
                                                                         <option value="" disabled></option>
-                                                                        <option value="nội địa">Nội địa</option>
-                                                                        <option value="ngoại địa">Ngoại địa</option>
+                                                                        <option value="1" <?= $tt->type_guide == 1 ? 'selected' : ''?>>Nội địa</option>
+                                                                        <option value="2" <?= $tt->type_guide == 2 ? 'selected' : ''?> >Ngoại địa</option>
                                                                     </select>
                                                                 </div>
                                                                 <div class="mb-3">

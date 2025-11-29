@@ -8,5 +8,7 @@
  }
 
 
-class Roll_call_Model extends BaseModel{}
+class Roll_call_Model extends BaseModel{
+
+}
 ?>

@@ -98,7 +98,7 @@
                 </td>
 
                 <td><?= htmlspecialchars($tt->name) ?></td>
-                <td><?= number_format($tt->price) ?> đ</td>
+                <td><?= number_format($tt->price,0,'','.') ?> VND</td>
                 <td><?= htmlspecialchars($tt->scope) ?></td>
                 <td><?= htmlspecialchars($tt->date) ?></td>
                 <td>

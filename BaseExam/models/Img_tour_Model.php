@@ -24,7 +24,7 @@ class Img_tour_Model extends BaseModel{
     }
 
 
-    //lấy ảnh để xóa
+    //lấy ảnh 
     public function get_img_tour($tour_id){
     $sql = "SELECT img FROM img_tour WHERE id_tour = :tour_id";
     $stmt = $this->pdo->prepare($sql);

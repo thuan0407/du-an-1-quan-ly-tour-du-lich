@@ -86,6 +86,7 @@ class Admin_Controller extends Base_Controller{
     function human_resource_management(){
     $notification = "";             
     $sql = "SELECT * FROM `tour_guide` WHERE 1"; // Mặc định lấy tất cả
+    $list_languages =$this->tourguideModel->get_languages_unique();
 
     // Lọc theo ngôn ngữ nếu có
     if(isset($_GET['foreign_languages']) && $_GET['foreign_languages'] != ""){
@@ -315,11 +316,12 @@ class Admin_Controller extends Base_Controller{
         $tour = new Tour();
         $tour->name             = trim($_POST['name'] ?? '');
         $tour->price            = floatval($_POST['price'] ?? 0);
-        $tour->number_of_days       = intval($_POST['number_of_days'] ?? 0);
+        $tour->number_of_days   = intval($_POST['number_of_days'] ?? 0);
         $tour->number_of_nights = intval($_POST['number_of_nights'] ?? 0);
         $tour->scope            = intval($_POST['scope'] ?? 0);
         $tour->describe         = trim($_POST['describe'] ?? '');
         $tour->status           = 1;
+        $tour->type_tour        = $_POST['type_tour'];
         $tour->date             = date("Y-m-d");
         $tour->id_tourtype      = $_POST['id_tourtype'] ?? null;
         $tour->type_tour        = $_POST['type_tour'] ?? 1;
@@ -834,7 +836,7 @@ function supplier_management() {
 
     // ===========================      quản lý đặt tour     ===================================
 
-    function booking_content(){
+    function booking_tour(){
         $notification="";
         $sql = "SELECT t.*, i.img AS image                                     
                     FROM `tour` t
@@ -843,37 +845,377 @@ function supplier_management() {
                     ORDER BY t.id, i.id";
         $list_tour = $this->tourModel->tour_status($sql);
 
-        include 'views/admin/booking_manager/booking_content.php';
+        include 'views/admin/booking_manager/book_individual_tours/content.php';
     }
 
 
     function search_booking_tour(){
-        // Xử lý tìm kiếm
-        $bookedTours = $this->booktourModel->getidbooking(); // biến lấy toàn bộ danh id trong bảng book tour để sa sánh
-        $result=[];
-        $notification="";
-        $list = $this->tourModel->all();
-        if(isset($_GET['search_booking_tour'])){
-            $key_word = trim($_GET['key_word']);
-            if($key_word === ""){
-                $notification = "Bạn chưa nhập dữ liệu";
-            } else {
-                $result = [];
-                foreach($list as $tt){
-                    if(stripos($tt->name, $key_word) !== false){
-                        $result[] = $tt;
-                    }
-                }
+    $result = [];
+    $notification = "";
+    $list_tour = $this->tourModel->all();
 
-                if(empty($result)){
-                    $notification = "Không tìm thấy kết quả";
-                } else {
-                    $list = $result; // gán kết quả tìm được
+    if(isset($_GET['search_booking_tour'])){
+        
+        $key_word = trim($_GET['key_word']);
+
+        if($key_word === ""){
+            $notification = "Bạn chưa nhập dữ liệu";
+        } else {
+
+            foreach($list_tour as $tt){
+                if(stripos($tt->name, $key_word) !== false){
+                    $result[] = $tt;
                 }
-                header("Location:?action=booking_content");
+            }
+
+            if(empty($result)){
+                $notification = "Không tìm thấy kết quả";
+            } else {
+                $list_tour = $result;
             }
         }
-        include 'views/admin/booking_manager/booking_content.php';
+    }
+
+    include 'views/admin/booking_manager/book_individual_tours/content.php';
+}
+
+    function booking_individual_tours_detail($id){
+        $tour              = $this->tourModel->find_tour($id);                         //lấy tour tương ứng với id
+        $tour_img          = $this->imgtourModel->get_img_tour($id);                   //lấy ảnh tour ở dạng một chiều
+
+        $address           = $this->addressModel->get_address($id);                    // lấy địa điểm của tour ở dạng mảng một chiều
+        $tour_supplier     = $this->toursupplierModel->find_tour_supplier($id);        // lấy danh sach loại dịch vụ
+
+        $id_tourtype       = $tour->id_tourtype;
+        $tour_type         = $this->tourtypeModel->find_tour_type($id_tourtype);       // loại tour
+
+        $type_guide        = $tour->type_tour;
+        $list_guide        = $this->tourguideModel->get_type_guide($type_guide);        // Danh sách hướng dẫn viên lọc theo id khu vực
+
+        $contract           = new Contract();
+        $book_tour          = new Book_tour();
+        $customer_list      = new Customer_list();
+        $departure_schedule = new Departure_schedule();
+        $pay                = new Pay();
+        $special_request    = new Special_request();
+
+        if(isset($_POST['order_tour'])){
+            //---- Tạo lịch khởi hành ----//
+            $departure_schedule->start_date       = $_POST['start_date'];
+            $departure_schedule->end_date         = $_POST['end_date'];
+            $departure_schedule->start_location   = $_POST['start_location'];
+            $departure_schedule->end_location     = $_POST['end_location'];
+            $departure_schedule->note             = $_POST['departure_schedule_note'] ?? '';
+            $departure_schedule->id_tour_guide    = $_POST['tour_guide_id'];
+            $departure_schedule->status           = 1;
+
+            $departureschedule_id = $this->departurescheduleModel->create($departure_schedule);
+
+            //---- Lưu chi tiết lịch khởi hành --------//
+            $days     = $_POST['details_every_day'];          // mảng ngày dạng 'YYYY-MM-DD'
+            $contents = $_POST['detailed_content_every_day']; // mảng nội dung
+
+            for ($i = 0; $i < count($days); $i++) {
+                if (empty(trim($days[$i])) || empty(trim($contents[$i]))) continue;
+
+                $detail = [
+                    'id_departure_schedule' => $departureschedule_id,
+                    'date'                  => $days[$i],   // lưu ngày
+                    'content'               => $contents[$i]
+                ];
+
+                $this->departurescheduledetailsModel->addDailyPlan($detail);
+            }
+
+            //---- Tạo booking ----//
+            $book_tour->date                    = date("Y-m-d");
+            $book_tour->total_amount            = $_POST['total_amount'];
+            $book_tour->note                    = $_POST['departure_schedule_note'] ?? '';
+            $book_tour->status                  = 2;
+            $book_tour->quantity                = $_POST['quantity'];
+            $book_tour->id_departure_schedule   = $departureschedule_id;
+            $book_tour->id_tour_guide           = $_POST['tour_guide_id'];
+            $book_tour->id_tour                 = $id;
+            $book_tour->number_of_days          = $_POST['number_of_days'];
+            $book_tour->number_of_nights        = $_POST['number_of_nights'];
+            $book_tour->phone                   = $_POST['phone'];
+            $book_tour->customername            = $_POST['customername'];
+
+            $book_tour_id = $this->booktourModel->create($book_tour);
+
+            //---- Lưu danh sách khách ----//
+            if(isset($_FILES['list_customer']) && $_FILES['list_customer']['size'] > 0){
+                $file = $_FILES['list_customer'];
+                $unique = time() . "_" . $file['name'];
+                $uploadDir = __DIR__ . '/../uploads/list_customer/';
+                $path = $uploadDir . $unique;
+                move_uploaded_file($file['tmp_name'], $path);
+
+                $customer_list->list_customer = "uploads/list_customer/" . $unique;
+                $customer_list->quantity      = $_POST['quantity'];
+                $customer_list->note          = $_POST['note_customer'];
+                $customer_list->id_book_tour  = $book_tour_id;
+
+                $this->customerlistModel->create($customer_list);
+            }
+
+            //---- Lưu hợp đồng ----//
+            if(isset($_FILES['content_contract']) && $_FILES['content_contract']['size'] > 0){
+                $fileContract = $_FILES['content_contract'];
+                $uniqueContract = time() . "_" . $fileContract['name'];
+                $uploadDirContract = __DIR__ . '/../uploads/contract/';
+                $pathContract = $uploadDirContract . $uniqueContract;
+                move_uploaded_file($fileContract['tmp_name'], $pathContract);
+
+                $contract->name          = $_POST['name_contract'];
+                $contract->date          = date("Y-m-d");
+                $contract->status        = 1;
+                $contract->value         = $_POST['value_contract'];
+                $contract->content       = "uploads/contract/" . $uniqueContract;
+                $contract->id_book_tour  = $book_tour_id;
+
+                $this->contractModel->create($contract);
+            }
+
+            // ------ Tạo thanh toán ------- //
+            $pay ->date                  = date("Y-m-d");
+            $pay ->payment_method        = $_POST['payment_method'];
+            $pay ->amount_money          = $_POST['amount_money'];
+            $pay ->note                  = $_POST['pay_note'];
+            if($pay->amount_money == $book_tour->total_amount){      // kiểm tra thanh toán 
+                $pay ->status  = 2;
+            }else{
+                $pay ->status = 1;
+            }
+            $pay ->id_book_tour          = $book_tour_id;
+
+            $this->payModel->create($pay);   
+            
+            // ------ Tạo yêu cầu đặc biệt
+            $special_request->date             = date("Y-m-d");
+            $special_request->content          = $_POST['content_spceail'];
+            $special_request->status           = 1;
+            $special_request->id_book_tour     = $book_tour_id;  
+            
+            $this->specialrequestModel->create($special_request);
+
+           $success = "Đặt tour thành công!";
+
+        }
+
+        include 'views/admin/booking_manager/book_individual_tours/detail.php';
+    }
+
+
+// ==================================================================================
+
+
+    function waiting_for_approval(){                                               // tour chờ duyệt  
+        $notification="";
+        $status = 1;
+        $list_book_tour = $this->booktourModel->get_book_tour_all($status);        // lấy tất cả tour đang hoạt động
+
+        include 'views/admin/booking_manager/waiting_for_approval/content.php';
+    }
+
+    function waiting_for_approval_detail($id){                                               // tour chờ duyệt chi tiết 
+        $notification="";
+        $status = 1;
+        
+        $book_tour         = $this->booktourModel->get_book_tour($id);                      // lấy tour chờ duyệt
+
+        $id_tour           = $book_tour->id_tour;
+        $tour              = $this->tourModel->find_tour($id_tour);                         //lấy tour tương ứng với id
+
+        $id_tourtype       = $tour->id_tourtype;
+        $tour_type         = $this->tourtypeModel->find_tour_type($id_tourtype);        //Lất loại tour 
+
+        $address           = $this->addressModel->get_address($id_tour);                // lấy địa điểm của tour ở dạng mảng một chiều
+        $tour_supplier     = $this->toursupplierModel->find_tour_supplier($id_tour);    // lấy danh sach loại dịch vụ của tour
+
+        $type_guide        = $tour->type_tour;
+        $list_guide        = $this->tourguideModel->get_type_guide($type_guide);        // Danh sách hướng dẫn viên lọc theo id khu vực
+
+        $contract           = new Contract();
+        $customer_list      = new Customer_list();
+        $departure_schedule = new Departure_schedule();
+        $pay                = new Pay();
+        $special_request    = new Special_request();
+
+        if(isset($_POST['browse_tours'])){
+            //---- Tạo lịch khởi hành ----//
+            $departure_schedule->start_date       = $_POST['start_date'];
+            $departure_schedule->end_date         = $_POST['end_date'];
+            $departure_schedule->start_location   = $_POST['start_location'];
+            $departure_schedule->end_location     = $_POST['end_location'];
+            $departure_schedule->note             = $_POST['departure_schedule_note'] ?? '';
+            $departure_schedule->id_tour_guide    = $_POST['tour_guide_id'];
+            $departure_schedule->status           = 1;
+
+            $departureschedule_id = $this->departurescheduleModel->create($departure_schedule);
+
+            //---- Lưu chi tiết lịch khởi hành --------//
+            $days     = $_POST['details_every_day'];          // mảng ngày dạng 'YYYY-MM-DD'
+            $contents = $_POST['detailed_content_every_day']; // mảng nội dung
+
+            for ($i = 0; $i < count($days); $i++) {
+                if (empty(trim($days[$i])) || empty(trim($contents[$i]))) continue;
+
+                $detail = [
+                    'id_departure_schedule' => $departureschedule_id,
+                    'date'                  => $days[$i],   // lưu ngày
+                    'content'               => $contents[$i]
+                ];
+
+                $this->departurescheduledetailsModel->addDailyPlan($detail);
+            }
+
+            //---- update booking ----//
+            $book_tour->date                    = date("Y-m-d");
+            $book_tour->total_amount = str_replace('.', '', $_POST['total_amount']);    // cuyển về dạng số
+            $book_tour->note                    = $_POST['departure_schedule_note'] ?? '';
+            $book_tour->status                  = 2;
+            $book_tour->quantity                = $_POST['quantity'];
+            $book_tour->id_departure_schedule   = $departureschedule_id;
+            $book_tour->id_tour_guide           = $_POST['tour_guide_id'];
+            $book_tour->number_of_days          = $_POST['number_of_days'];
+            $book_tour->number_of_nights        = $_POST['number_of_nights'];
+            $book_tour->phone                   = $_POST['phone'];
+            $book_tour->customername            = $_POST['customername'];
+            
+
+             $this->booktourModel->update_book_tour($book_tour);
+
+            //---- Lưu danh sách khách ----//
+            if(isset($_FILES['list_customer']) && $_FILES['list_customer']['size'] > 0){
+                $file = $_FILES['list_customer'];
+                $unique = time() . "_" . $file['name'];
+                $uploadDir = __DIR__ . '/../uploads/list_customer/';
+                $path = $uploadDir . $unique;
+                move_uploaded_file($file['tmp_name'], $path);
+
+                $customer_list->list_customer = "uploads/list_customer/" . $unique;
+                $customer_list->quantity      = $_POST['quantity'];
+                $customer_list->note          = $_POST['note_customer'];
+                $customer_list->id_book_tour  = $book_tour->id;
+
+                $this->customerlistModel->create($customer_list);
+            }
+
+            //---- Lưu hợp đồng ----//
+            if(isset($_FILES['content_contract']) && $_FILES['content_contract']['size'] > 0){
+                $fileContract = $_FILES['content_contract'];
+                $uniqueContract = time() . "_" . $fileContract['name'];
+                $uploadDirContract = __DIR__ . '/../uploads/contract/';
+                $pathContract = $uploadDirContract . $uniqueContract;
+                move_uploaded_file($fileContract['tmp_name'], $pathContract);
+
+                $contract->name          = $_POST['name_contract'];
+                $contract->date          = date("Y-m-d");
+                $contract->status        = 1;
+                $contract->value         = $_POST['value_contract'];
+                $contract->content       = "uploads/contract/" . $uniqueContract;
+                $contract->id_book_tour  = $book_tour->id;
+
+                $this->contractModel->create($contract);
+            }
+
+            // ------ Tạo thanh toán ------- //
+            $pay ->date                  = date("Y-m-d");
+            $pay ->payment_method        = $_POST['payment_method'];
+            $pay ->amount_money          = $_POST['amount_money'];
+            $pay ->note                  = $_POST['pay_note'];
+            $pay ->status                = 1;
+            $pay ->id_book_tour          = $book_tour->id;
+
+            $this->payModel->create($pay);   
+            
+            // ------ Tạo yêu cầu đặc biệt
+            $special_request->date             = date("Y-m-d");
+            $special_request->content          = $_POST['content_spceail'];
+            $special_request->status           = 1;
+            $special_request->id_book_tour     = $book_tour->id;  
+            
+            $this->specialrequestModel->create($special_request);
+
+           $success = "Duyệt tour thành công!";
+
+        }
+
+        include 'views/admin/booking_manager/waiting_for_approval/detail.php';
+    }
+
+    function waiting_for_approval_delete($id){       //xóa tour chờ duyệt
+        $success ="";
+        $error ="";
+        if(empty($id)){
+            echo "tour này không tồn tại!";
+        }else{
+            $result =$this->booktourModel->delete_book_tour($id);
+            if($result ==1){
+                header("Location:?action=waiting_for_approval&msg=success");
+                exit();
+            }
+            else{
+                header("Location:?action=waiting_for_approval&msg=error");
+                exit();
+            }
+        }
+        }
+
+    function tour_is_active(){                                                     // tour đang hoạt động               
+        $notification="";
+        $status = 2;
+        $list_book_tour = $this->booktourModel->get_book_tour_all($status);        // lấy tour đang hoạt động
+
+
+        include 'views/admin/booking_manager/tour_is_active/content.php';
+    }
+
+    function tour_is_active_detail($id){
+        $book_tour         = $this->booktourModel->get_book_tour($id);
+        $id_tour           = $book_tour->id_tour;
+        $tour              = $this->tourModel->find_tour($id_tour);                         //lấy tour tương ứng với id
+
+        $id_tourtype       = $tour->id_tourtype;
+        $tour_type         = $this->tourtypeModel->find_tour_type($id_tourtype);        //Lấy loại tour 
+
+        $address           = $this->addressModel->get_address($id_tour);                // lấy địa điểm của tour ở dạng mảng một chiều
+        $tour_supplier     = $this->toursupplierModel->find_tour_supplier($id_tour);    // lấy danh sach loại dịch vụ của tour
+
+        $type_guide        = $tour->type_tour;
+        $list_guide        = $this->tourguideModel->get_type_guide($type_guide);        // Danh sách hướng dẫn viên lọc theo id khu vực
+
+        $id_tour_guide     = $book_tour->id_tour_guide;                          
+        $tour_guide        =$this->tourguideModel->find_tour_guide($id_tour_guide);
+
+        $id_departure_schedule = $book_tour->id_departure_schedule;                      
+        $departure_schedule    = $this->departurescheduleModel->get_departure_schedule($id_departure_schedule);  // lấy lịch khởi hành
+
+
+        $step      = $departure_schedule->status; 
+        $arr1      = ["Chuẩn bị khởi hành","Khỏi hành"];//điểm khởi hành
+        $arr2      = $address;
+        $arr3      = ["Kết thúc"];// điểm kết thúc
+
+        $arr_merged = array_merge($arr1, $arr2, $arr3);
+
+
+
+
+        include 'views/admin/booking_manager/tour_is_active/detail.php';
+    }
+
+    function tour_has_ended(){                                                     // tour đã kết thúc
+        $notification="";
+        $sql = "SELECT t.*, i.img AS image                                     
+                    FROM `tour` t
+                    LEFT JOIN img_tour i ON t.id = i.id_tour
+                    WHERE t.status = 1
+                    ORDER BY t.id, i.id";
+        $list_tour = $this->tourModel->tour_status($sql);
+
+        include 'views/admin/booking_manager/tour_has_ended/content.php';
     }
 
 }

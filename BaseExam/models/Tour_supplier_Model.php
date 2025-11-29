@@ -60,7 +60,7 @@ class Tour_supplier_Model extends BaseModel{
         $sql = "SELECT * FROM tour_supplier WHERE id_tour = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt-> execute(['id'=>$id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     public function update($id, $type_service, $id_supplier) {

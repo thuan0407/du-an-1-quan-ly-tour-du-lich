@@ -1,3 +1,5 @@
+
+<?php $guide = $this->model->find_tour_guide($guide_id);?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -19,9 +21,7 @@
       min-height: 100vh;
       flex-direction: row;
     }
-    
 
-    /* Sidebar */
     .sidebar {
       width: 250px;
       background-color: #1e90ff;
@@ -37,23 +37,8 @@
       z-index: 1000;
     }
 
-    .sidebar.hidden {
-      transform: translateX(-100%);
-    }
-
-    .sidebar h2 {
-      text-align: center;
-      font-size: 20px;
-      margin-bottom: 20px;
-    }
-
-    .menu {
-      list-style: none;
-    }
-
     .menu li {
       padding: 15px 20px;
-      cursor: pointer;
       transition: background 0.2s;
     }
 
@@ -68,16 +53,10 @@
       display: block;
     }
 
-    /* Main content */
     .content {
       margin-left: 250px;
       padding: 20px;
-      width: 100%;
-      transition: margin-left 0.3s ease;
-    }
-
-    .content.shifted {
-      margin-left: 0;
+      width: calc(100% - 250px);
     }
 
     header {
@@ -98,35 +77,6 @@
       color: #1e90ff;
     }
 
-    .user-info {
-      font-size: 14px;
-      color: #555;
-    }
-
-    /* Hamburger button */
-    .menu-toggle {
-      display: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: #1e90ff;
-    }
-
-    /* Nội dung từng phần */
-    section {
-      display: none;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-
-    section.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Responsive */
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
@@ -139,30 +89,47 @@
 
       .content {
         margin-left: 0;
+        width: 100%;
       }
 
       .menu-toggle {
-        display: block;
-      }
-
-      header h1 {
-        font-size: 20px;
+        display: block !important;
       }
     }
+
+    .menu-toggle {
+      display: none;
+      font-size: 26px;
+      cursor: pointer;
+      color: #1e90ff;
+    }
+    .menu {
+    list-style: none;
+    padding-left: 0;
+}
 
   </style>
 </head>
 <body>
 
   <aside class="sidebar">
-    <h2>Hướng dẫn viên</h2>
+    <h2 style="text-align:center; margin-bottom: 20px;">Hướng dẫn viên</h2>
     <ul class="menu">
-        <li class="active"><a href="#" data-section="profile">Hồ sơ cá nhân</a></li>
-      <li><a href="#" data-section="schedule">Xem lịch làm việc</a></li>
-      <li><a href="#" data-section="booktour">Đặt tour</a></li>
-      <li><a href="#" data-section="journal">Nhật ký tour</a></li>
-      <li><a href="#" data-section="feedback">Phản hồi & đánh giá</a></li>
-      <li><a href="#" data-section="list">Xem danh sách</a></li>
+        <li class="<?= ($action=='home_guide') ? 'active' : '' ?>">
+            <a href="?action=home_guide">Hồ sơ cá nhân</a>
+        </li>
+
+        <li class="<?= ($action=='schedule_guide') ? 'active' : '' ?>">
+            <a href="?action=schedule_guide">Xem lịch làm việc</a>
+        </li>
+
+        <li class="<?= ($action=='guide_Alltour') ? 'active' : '' ?>">
+            <a href="?action=guide_Alltour">Đặt tour</a>
+        </li>
+
+        <li class="<?= ($action=='guide_pending_tour') ? 'active' : '' ?>">
+            <a href="?action=guide_pending_tour">Tour chờ duyệt</a>
+        </li>
     </ul>
   </aside>
 
@@ -170,74 +137,40 @@
     <header>
       <span class="menu-toggle">☰</span>
       <h1>Bảng điều khiển</h1>
-      <div class="user-info">Xin chào, <strong>Nguyễn Văn A</strong></div>
+
+      <div class="user-info">
+          Xin chào, <strong><?= htmlspecialchars($guide->name) ?> 👋</strong>
+          | <a href="?action=logout_guide" style="color:red;" 
+            onclick="return confirm('Bạn có chắc muốn đăng xuất không?');">
+            Đăng xuất
+          </a>
+      </div>
     </header>
 
-    <section id="profile" class="active">
-      <h2>🧑 Hồ sơ cá nhân</h2>
-      <p>Thông tin hướng dẫn viên: họ tên, số điện thoại, kinh nghiệm, ngôn ngữ, v.v...</p>
+    <!-- Nội dung view được load từ controller -->
+    <section>
+      <?php 
+          if (isset($viewFile)) {
+              include $viewFile;
+          } else {
+              echo "<p>Không tìm thấy view được truyền từ controller!</p>";
+          }
+      ?>
     </section>
 
-    <section id="schedule">
-      <h2>🗓️ Lịch làm việc</h2>
-      <p>Danh sách các tour bạn sẽ dẫn trong tuần này và tháng tới.</p>
-    </section>
-
-    <section id="booktour">
-      <h2>🚌 Đặt tour</h2>
-      <p>Trang cho phép hướng dẫn viên đăng ký hoặc nhận tour mới.</p>
-    </section>
-
-    <section id="journal">
-      <h2>📖 Nhật ký tour</h2>
-      <p>Ghi chép nhật ký hành trình, tình trạng khách, và các sự kiện trong tour.</p>
-    </section>
-
-    <section id="feedback">
-      <h2>⭐ Phản hồi & Đánh giá</h2>
-      <p>Xem phản hồi của khách du lịch, đánh giá tour và cải thiện chất lượng phục vụ.</p>
-    </section>
-
-    <section id="list">
-      <h2>📋 Danh sách tour đã tham gia</h2>
-      <p>Liệt kê toàn bộ tour mà hướng dẫn viên từng tham gia.</p>
-    </section>
   </div>
 
   <script>
-    const links = document.querySelectorAll('.menu a');
-    const sections = document.querySelectorAll('section');
-    const menuItems = document.querySelectorAll('.menu li');
     const sidebar = document.querySelector('.sidebar');
     const toggleBtn = document.querySelector('.menu-toggle');
-    const content = document.querySelector('.content');
 
-    // Đổi nội dung khi bấm menu
-    links.forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        const target = link.dataset.section;
-
-        sections.forEach(sec => sec.classList.remove('active'));
-        document.getElementById(target).classList.add('active');
-
-        menuItems.forEach(item => item.classList.remove('active'));
-        link.parentElement.classList.add('active');
-
-        // Ẩn sidebar sau khi chọn mục (trên mobile)
-        sidebar.classList.remove('show');
-      });
-    });
-
-    // Bật/tắt menu trên mobile
     toggleBtn.addEventListener('click', () => {
       sidebar.classList.toggle('show');
     });
 
-    // Ẩn menu khi click ngoài
     document.addEventListener('click', e => {
       if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-sidebar.classList.remove('show');
+        sidebar.classList.remove('show');
       }
     });
   </script>

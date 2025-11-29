@@ -14,7 +14,7 @@
     <!-- Nút mở popup thêm nhà cung cấp -->
     <div class="mb-3">
         <button type="button"
-                class="btn btn-primary"
+                class="btn btn-success"
                 data-bs-toggle="modal"
                 data-bs-target="#createSupplierModal">
             + Thêm nhà cung cấp
@@ -134,15 +134,15 @@
                     <td><?= htmlspecialchars($sp->phone_number) ?></td>
                     <td>
                         <?php if ((int)$sp->status === 1): ?>
-                            <span class="badge bg-success">Hoạt động</span>
+                            <span class="btn btn-success">Hoạt động</span>
                         <?php else: ?>
-                            <span class="badge bg-secondary">Ngừng</span>
+                            <span class="btn btn-danger" style="width:100px;">Ngừng</span>
                         <?php endif; ?>
                     </td>
                     <td>
                         <!-- Nút mở popup chi tiết -->
                         <button type="button"
-                                class="btn btn-info btn-sm"
+                                class="btn btn-warning"
                                 data-bs-toggle="modal"
                                 data-bs-target="#detailSupplier<?= $sp->id ?>">
                             Chi tiết
