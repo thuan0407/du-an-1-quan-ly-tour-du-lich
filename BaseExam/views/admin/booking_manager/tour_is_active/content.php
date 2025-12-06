@@ -1,6 +1,17 @@
 <?php require_once __DIR__ . '/../../navbar.php'; ?>
 <?php require_once __DIR__ . '/../nav_booking.php'; ?>
-
+<?php
+$success = '';
+$error = '';
+// Lấy thông báo từ GET param "msg"
+if(isset($_GET['msg'])){
+    if($_GET['msg'] == 'success'){
+        $success = "Hủy book tour thành công!";
+    } elseif($_GET['msg'] == 'error'){
+        $error = "Hủy tour thất bại hoặc book tour không tồn tại!";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,6 +29,15 @@
             <input type="hidden" name="action" value="search_booking_tour">
             <span style="color:red;"><?= $notification?></span>
         </form> -->
+        <!-- thông báo -->
+        
+        <?php if (!empty($success)): ?>
+        <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+        <?php endif; ?>
+
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
 
         <table class="table talbe:hover">
             <thead>

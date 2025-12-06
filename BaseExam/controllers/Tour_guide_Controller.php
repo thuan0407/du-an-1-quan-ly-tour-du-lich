@@ -13,6 +13,7 @@ class Tour_guide_Controller extends Base_Controller{
         $this->tourModel = new Tour_Model();
         $this->booktourModel           = new Book_tour_Model();
         $this->addressModel            = new Address_Model();
+        $this->rollcallModel           = new Roll_call_Model();
         }
 
     // ================== ĐĂNG NHẬP HƯỚNG DẪN VIÊN =======================
@@ -134,7 +135,7 @@ class Tour_guide_Controller extends Base_Controller{
                 if ($now < $start) $schedule->status = 1;   // Chuẩn bị
                 elseif ($now >= $start && $now <= $end) $schedule->status = 2; // Đang diễn ra
                 else $schedule->status = 3; // Đã kết thúc
-            }
+            } 
         }
         // View lịch làm việc
         $viewFile = "./views/tour_guide/schedule.php";
@@ -484,7 +485,6 @@ public function guide_Alltour() {
         'note'                  => $_POST['note'],
         'number_of_days'        => $_POST['number_of_days'],
         'number_of_nights'      => $_POST['number_of_nights'],
-        'id_user'               => $_SESSION['user_id'] ?? null,
         'quantity'              => $_POST['quantity'],
         'id_departure_schedule' => $_POST['id_departure_schedule'] ?? null,
         'id_tour_guide'         => $guide_id,
@@ -511,6 +511,7 @@ public function guide_Alltour() {
 
 
 
+
     public function pending_tour() {
         // 1️⃣ Kiểm tra hướng dẫn viên đăng nhập
         $guide_id = $_SESSION['guide_id'] ?? null;
@@ -527,6 +528,81 @@ public function guide_Alltour() {
         require "./views/tour_guide/home_guide.php";  
     }
 
+
+    // ================== DANH SÁCH ĐIỂM DANH =======================
+    public function rollcall() {
+        $guide_id = $_SESSION['guide_id'] ?? null;
+        if (!$guide_id) {
+            header("Location: ?action=login_guide");
+            return;
+        }
+
+        if (!isset($_GET['id_departure_schedule'])) {
+            echo "Thiếu ID lịch khởi hành!";
+            return;
+        }
+
+        $id_departure_schedule = intval($_GET['id_departure_schedule']);
+
+        // Lấy dữ liệu điểm danh
+        $rollCalls = $this->rollcallModel->getBySchedule($id_departure_schedule);
+        $this->departurescheduleModel = new departure_schedule_Model();
+        $detail = $this->departurescheduleModel->findDetail($id_departure_schedule);
+
+        $viewFile = "./views/tour_guide/rollcall.php";
+        require "./views/tour_guide/home_guide.php";
+    }
+
+
+// ================== CẬP NHẬT ĐIỂM DANH =======================
+public function roll_call_update() {
+    $guide_id = $_SESSION['guide_id'] ?? null;
+    if (!$guide_id) {
+        header("Location: ?action=login_guide");
+        return;
+    }
+
+    if (!isset($_POST['id_departure_schedule'])) {
+        echo "Thiếu dữ liệu!";
+        return;
+    }
+
+    $id_departure_schedule = intval($_POST['id_departure_schedule']);
+    $note = trim($_POST['note'] ?? "");
+
+    // Mỗi lần điểm danh, luôn thêm một bản ghi mới
+    $this->rollcallModel->insertRollCall($id_departure_schedule, $note);
+
+    echo "<script>
+        alert('Cập nhật điểm danh thành công!');
+        window.location.href = '?action=rollcall&id_departure_schedule={$id_departure_schedule}';
+    </script>";
+    exit;
+}
+
+
+
+// ================== FORM ĐIỂM DANH =======================
+public function roll_call_form() {
+    $guide_id = $_SESSION['guide_id'] ?? null;
+    if (!$guide_id) {
+        header("Location: ?action=login_guide");
+        return;
+    }
+
+    if (!isset($_GET['id_departure_schedule'])) {
+        echo "Thiếu ID lịch khởi hành!";
+        return;
+    }
+
+    $id_departure_schedule = intval($_GET['id_departure_schedule']);
+
+    // Lấy dữ liệu nếu đã có
+    $rollCall = $this->rollcallModel->findOne($id_departure_schedule);
+
+    $viewFile = "./views/tour_guide/rollcall.php";
+    require "./views/tour_guide/home_guide.php";
+}
 }
 
 ?> 

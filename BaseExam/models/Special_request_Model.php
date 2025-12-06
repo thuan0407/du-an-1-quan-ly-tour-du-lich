@@ -105,5 +105,42 @@ public function getAllRequests($id_tour_guide, $id_book_tour) {
         ]);
     }
 
+    //lấy danh sách yêu cầu đặc biệt theo id của book tour
+    public function get_special_request_list($id_book_tour){
+        try{
+            $sql ="SELECT * FROM special_request WHERE id_book_tour =:id_book_tour";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':id_book_tour'=>$id_book_tour]);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $list =[];
+            foreach($data as $tt){
+                $special_request = new Special_request();
+                $special_request->id             =$tt['id'];
+                $special_request->content        =$tt['content'];
+                $special_request->status         =$tt['status'];
+                $special_request->id_book_tour   =$tt['id_book_tour'];
+                $special_request->id_tour_guide  =$tt['id_tour_guide'];
+                $special_request->date           =$tt['date'];
+                $list[]=$special_request;
+            }
+            return $list;
+        }catch(PDOException $err){
+            echo "Câu truy vấn lỗi :".$err->getMessage();
+            return null;
+        } 
+    }
+
+        public function delete_special_request($id_book_tour){
+            try{
+                $sql  ="DELETE FROM special_request WHERE id_book_tour = :id_book_tour";
+                $stmt =$this->pdo->prepare($sql);
+                $stmt->execute([':id_book_tour'=>$id_book_tour]);
+                return $stmt->rowCount();
+            }catch(PDOException $err){
+            echo "Lỗi xóa hợp đồng: "  .$err->getMessage();
+            return false;
+           }
+        }
+
 }
 ?>

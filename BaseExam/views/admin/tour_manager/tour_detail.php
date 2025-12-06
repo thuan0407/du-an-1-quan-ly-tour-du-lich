@@ -100,31 +100,31 @@
 
                     <div class="mb-3">
                         <label>Chính sách</label>
-                        <?php foreach($policies as $po): ?>
-                            <div style="text-align:center; margin-bottom:15px;"> <!-- mỗi policy 1 block -->
+                        <?php foreach($policies as $index => $po): ?>
+                            <div style="text-align:center; margin-bottom:15px;">
                                 <img src="<?= BASE_URL . $po['content'] ?>" width="100" style="display:block; margin:0 auto 5px;">
-                                <form action="?action=update_policy&id=<?= $po['id'] ?>" method="post" enctype="multipart/form-data">
-                                    <input type="file" name="content[]" accept="image/*">
-                                </form>
+                                <!-- hidden để lưu ID policy -->
+                                <input type="hidden" name="policy_id[<?= $index ?>]" value="<?= $po['id'] ?>">
+                                <input type="file" name="content[<?= $index ?>]" accept="image/*">
                             </div>
                         <?php endforeach; ?>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="">Loại dịch vụ</label>
-                        <?php foreach($tour_supplier as $sup): ?>
-                            <div class="mb-2">
-                                <select name="type_service[]" class="form-control">
-                                    <?php foreach($list_tour_supplier as $list_ts): ?>
-                                        <option value="<?= $list_ts->id ?>"
-                                            <?= $list_ts->type_service == $sup['type_service'] ? 'selected' : '' ?>>
-                                            <?= $list_ts->type_service ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        <?php endforeach; ?>
+
+                <?php foreach($tour_supplier as $sup): ?>
+                    <div class="mb-2">
+                        <select name="type_service[]" class="form-control">
+                            <?php foreach($list_tour_supplier as $list_ts): ?>
+                                <option value="<?= $list_ts->id ?>"
+                                    <?= $list_ts->id == $sup['id'] ? 'selected' : '' ?>>
+                                    <?= $list_ts->type_service ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
+                <?php endforeach; ?>
+
+
 
                     <div class="mt-3">
                         <a class="btn btn-danger" href="?action=tour_manager_content">Quay lại</a>
@@ -137,9 +137,6 @@
         
         </div>
         </div>
-
-
-            
 
     </div>
 </body>

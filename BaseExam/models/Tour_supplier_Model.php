@@ -26,7 +26,7 @@ class Tour_supplier_Model extends BaseModel{
                     $tour_tupplier = new Tour_supplier();
                     $tour_tupplier->id             =$tt['id'];
                     $tour_tupplier->type_service   =$tt['type_service'];
-                    $tour_tupplier->id_supplier    =$tt['id_supplier'];
+                    $tour_tupplier->id_suppl       =$tt['id_supplier'];
                     $tour_tupplier->id_tour        =$tt['id_tour'];
                     $list[]=$tour_tupplier;
                 }
@@ -56,12 +56,13 @@ class Tour_supplier_Model extends BaseModel{
         return $stmt;
     }
 
-    public function find_tour_supplier($id){
-        $sql = "SELECT * FROM tour_supplier WHERE id_tour = :id";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt-> execute(['id'=>$id]);
-        return $stmt->fetchAll(PDO::FETCH_COLUMN);
-    }
+public function find_tour_supplier($id){
+    $sql = "SELECT * FROM tour_supplier WHERE id_tour = :id";
+    $stmt = $this->pdo->prepare($sql);
+    $stmt-> execute(['id'=>$id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);  // Trả về mảng kết hợp (array)
+}
+
 
     public function update($id, $type_service, $id_supplier) {
         $stmt = $this->pdo->prepare("UPDATE tour_supplier SET type_service = ?, id_supplier = ? WHERE id = ?");
@@ -117,5 +118,15 @@ class Tour_supplier_Model extends BaseModel{
                 ORDER BY id ASC";
         return $this->pdo->query($sql)->fetchAll();
     }
+
+public function delete_by_service_id($tour_id, $service_id) {
+    $sql = "DELETE FROM tour_supplier WHERE id_tour = :tour_id AND id = :service_id";
+    $stmt = $this->pdo->prepare($sql);
+    return $stmt->execute([
+        'tour_id' => $tour_id,
+        'service_id' => $service_id
+    ]);
+}
+
 }
 ?>

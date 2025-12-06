@@ -15,7 +15,22 @@ class Admin_Controller extends Base_Controller{
             exit;
         }
     } 
+
     function home_admin(){                       //trang home admin
+        $total_amount    = $this->payModel->get_total_amount();
+        $status_1 = 1;
+        $status_2 = 2;
+        $status_3 = 3;
+        $total_book_tour_1 =$this->booktourModel->getTotalToursStatus($status_1);
+        $total_book_tour_2 =$this->booktourModel->getTotalToursStatus($status_2);
+        $total_book_tour_3 =$this->booktourModel->getTotalToursStatus($status_3);
+
+        $payModel = new Pay_Model();
+        $revenue = $payModel->getRevenueByMonth(); // dữ liệu năm hiện tại
+
+        $labels = json_encode($revenue['labels']);
+        $data   = json_encode($revenue['data']);
+
         include 'views/admin/home_admin.php';
     }
 
@@ -96,11 +111,10 @@ class Admin_Controller extends Base_Controller{
 
     // Nếu muốn lọc theo khu vực, chỉ bật khi có param type_guide
     if(isset($_GET['type_guide']) && $_GET['type_guide'] != ""){
-        $type = strtolower($_GET['type_guide']);
-        if($type === 'nội địa' || $type === 'ngoại địa'){
-            $sql .= " AND LOWER(type_guide) = '$type'";
-        }
+        $type = intval($_GET['type_guide']);
+        $sql .= " AND type_guide = $type";
     }
+
 
     $list = $this->tourguideModel->filter_tour_guide($sql);
 
@@ -325,6 +339,7 @@ class Admin_Controller extends Base_Controller{
         $tour->date             = date("Y-m-d");
         $tour->id_tourtype      = $_POST['id_tourtype'] ?? null;
         $tour->type_tour        = $_POST['type_tour'] ?? 1;
+        $tour->location        = $_POST['type_tour'] ?? 1;
 
         // 2. Lưu tour vào DB
         $tour_id = $this->tourModel->insert($tour);
@@ -361,20 +376,32 @@ class Admin_Controller extends Base_Controller{
             }
 
             // 5. Lưu chính sách
-            if(!empty($_FILES['content']['name'])){
-                foreach($_FILES['content']['name'] as $key => $name){
-                    if($_FILES['content']['error'][$key] === 0){
-                        $tmp_name = $_FILES['content']['tmp_name'][$key];
-                        $unique_name = time() . "_" . $name;
-                        $path = "uploads/policy/$unique_name";
-                        move_uploaded_file($tmp_name, $path);
-                        $this->policyModel->insert([
-                            'id_tour' => $tour_id,
-                            'content' => $path
-                        ]);
-                    }
-                }
+            $titles = $_POST['title'] ?? [];
+            $contents = $_POST['content'] ?? [];
+
+            for ($i = 0; $i < count($contents); $i++) {
+
+                // Nếu cả tiêu đề và nội dung đều trống thì bỏ qua
+                if (empty(trim($titles[$i])) && empty(trim($contents[$i]))) continue;
+
+                $this->policyModel->insert([
+                    'id_tour' => $tour_id,
+                    'title'   => trim($titles[$i]),
+                    'content' => trim($contents[$i])
+                ]);
             }
+
+            //lịch khởi hành từng ngày
+            $contents = $_POST['detailed_content_every_day'];
+            foreach ($contents as $content) {
+                if (empty(trim($content))) continue;
+                $detail = [
+                    'id_tour' => $tour_id,
+                    'content' => $content
+                ];
+                $this->scheduledetailsModel->addDailyPlan($detail);
+            }
+
 
             // 6. Lưu dịch vụ
             if(!empty($_POST['name_supplier'])){
@@ -471,7 +498,18 @@ function delete_tour($id){
         if(!$this->toursupplierModel->delete_tour_supplier($tour_id)) $error .= " Xóa nhà cung cấp thất bại.";
     }
 
-    // 7. Xóa tour với try-catch
+    // 7. Xóa lịch trình từng ngày
+    if (method_exists($this->scheduledetailsModel, 'delete_daily')) {
+        $this->scheduledetailsModel->delete_daily($tour_id);
+    }
+
+    // 8. Xóa tất cả policy thuộc tour
+    if (method_exists($this->policyModel, 'delete_policy')) {
+        $this->policyModel->delete_policy($tour_id);
+    }
+    $success = "Xóa tour thành công!";
+
+    // 8. Xóa tour với try-catch
     try {
         if(method_exists($this->tourModel,'delete_tour')){
             $this->tourModel->delete_tour($tour_id);
@@ -481,7 +519,7 @@ function delete_tour($id){
         $error .= " Xóa tour thất bại đang có booking tour ";
     }
 
-    // 8. Load lại danh sách tour
+    // 9. Load lại danh sách tour
     $list = $this->tourModel->all();
     include __DIR__ . '/../views/admin/tour_manager/tour_manager_content.php';
 }
@@ -568,7 +606,6 @@ public function tour_detail($id)
             }
         }
 
-
         if (!empty($_FILES['content']['name'])) {
             foreach ($_FILES['content']['name'] as $key => $name) {
                 if ($_FILES['content']['error'][$key] === 0) {
@@ -580,6 +617,7 @@ public function tour_detail($id)
 
                     if (move_uploaded_file($tmp, $path)) {
                         $relativePath = "uploads/policy/" . $unique; // lưu vào DB
+
                         if (!empty($_POST['policy_id'][$key])) {
                             // xóa file cũ
                             $oldFile = __DIR__ . '/../' . $policies[$key]['content'];
@@ -601,23 +639,27 @@ public function tour_detail($id)
             }
         }
 
+        $currentServices = array_map(function($s){ return $s['id']; }, $tour_supplier);
+        $newServices = array_map('intval', $_POST['type_service'] ?? []);   //Đảm bảo $newServices từ form là mảng số nguyên
 
-        if (!empty($_POST['type_service'])){
-
-            $this->toursupplierModel->delete_tour_supplier($id);
-
-            foreach ($_POST['type_service'] as $srvID) {
-                $srvObj = $this->toursupplierModel->getById($srvID);
-
-                if ($srvObj) {
-                    $this->toursupplierModel->insert([
-                        'id_tour'      => $id,
-                        'type_service' => $srvObj->type_service,
-                        'id_supplier'  => $srvObj->id_supplier ?? null
-                    ]);
-                }
+        // Xóa những dịch vụ không còn trong form
+        $toDelete = array_diff($currentServices, $newServices);
+        foreach ($toDelete as $delID) {
+            $this->toursupplierModel->delete_by_service_id($id, $delID);
+        }
+        // Thêm những dịch vụ mới
+        $toAdd = array_diff($newServices, $currentServices);
+        foreach ($toAdd as $srvID) {
+            $srvObj = $this->toursupplierModel->getById($srvID);
+            if ($srvObj) {
+                $this->toursupplierModel->insert([
+                    'id_tour'      => $id,
+                    'type_service' => $srvObj->type_service,
+                    'id_supplier'  => $srvObj->id_supplier ?? null
+                ]);
             }
         }
+
 
         echo "<script>alert('Cập nhật tour thành công!'); window.location.href='?action=tour_manager_content';</script>";
         exit();
@@ -1125,8 +1167,12 @@ function supplier_management() {
             $pay ->payment_method        = $_POST['payment_method'];
             $pay ->amount_money          = $_POST['amount_money'];
             $pay ->note                  = $_POST['pay_note'];
-            $pay ->status                = 1;
             $pay ->id_book_tour          = $book_tour->id;
+            if($pay->amount_money == $book_tour->total_amount){      // kiểm tra thanh toán 
+                $pay ->status  = 2;
+            }else{
+                $pay ->status = 1;
+            }
 
             $this->payModel->create($pay);   
             
@@ -1168,7 +1214,6 @@ function supplier_management() {
         $status = 2;
         $list_book_tour = $this->booktourModel->get_book_tour_all($status);        // lấy tour đang hoạt động
 
-
         include 'views/admin/booking_manager/tour_is_active/content.php';
     }
 
@@ -1187,12 +1232,17 @@ function supplier_management() {
         $list_guide        = $this->tourguideModel->get_type_guide($type_guide);        // Danh sách hướng dẫn viên lọc theo id khu vực
 
         $id_tour_guide     = $book_tour->id_tour_guide;                          
-        $tour_guide        =$this->tourguideModel->find_tour_guide($id_tour_guide);
+        $tour_guide        = $this->tourguideModel->find_tour_guide($id_tour_guide);
+
+        $pay               = $this->payModel->get_pay($book_tour->id);              //bảng thanh toán
 
         $id_departure_schedule = $book_tour->id_departure_schedule;                      
         $departure_schedule    = $this->departurescheduleModel->get_departure_schedule($id_departure_schedule);  // lấy lịch khởi hành
 
+        $list_departure_schedule_details = $this->departurescheduledetailsModel->get_all_departure_schedule_details($id_departure_schedule);  //danh sách lịch khởi hành           // lấy lịch khởi hành chi tiết
 
+        $list_special_request  = $this->specialrequestModel->get_special_request_list($book_tour->id);             // lấy danh sách yêu cầu đặc biệt
+        
         $step      = $departure_schedule->status; 
         $arr1      = ["Chuẩn bị khởi hành","Khỏi hành"];//điểm khởi hành
         $arr2      = $address;
@@ -1200,22 +1250,139 @@ function supplier_management() {
 
         $arr_merged = array_merge($arr1, $arr2, $arr3);
 
+            if(isset($_POST['cancel'])){
+            $amount_money = isset($_POST['amount_money_pay']) ? floatval($_POST['amount_money_pay']) : 0;
+            if ($amount_money < 0 || $amount_money > 99999999.99) {
+                echo "Giá trị thanh toán không hợp lệ!";
+                return;
+            }
+            $update_pay                        = $this->payModel->amount_money_pay($pay->id, $amount_money);              //update lại bảng pay
+            $delete_contract                   =  $this->contractModel->delete_contract($book_tour->id);                             //xóa bảng hợp đồng
+            $customer_list                     =  $this->customerlistModel->delete_customer_list($book_tour->id);                        //xóa bảng danh sách khách
+            $delete_special_request            =  $this->specialrequestModel->delete_special_request($book_tour->id);                                           //xóa yêu cầu đặc biệt
+            $delete_departure_schedule_details =  $this->departurescheduledetailsModel->delete_departure_schedule_details($book_tour->id_departure_schedule);  //xóa chi tiết lịch khởi hành
 
+            $book_tour_status      = 4;
+            $update_book_tour      =$this->booktourModel->update_book_tour_status($id, $book_tour_status);         //update lại bảng book tour
+
+            if($delete_contract>0 && $customer_list>0 && $delete_special_request>0 && $delete_departure_schedule_details>0 && $update_book_tour>0){
+                header("Location:?action=tour_is_active&msg=success");
+            }else{
+                header("Location:?action=tour_is_active&msg=error");
+            }
+
+        }
 
 
         include 'views/admin/booking_manager/tour_is_active/detail.php';
     }
 
-    function tour_has_ended(){                                                     // tour đã kết thúc
-        $notification="";
-        $sql = "SELECT t.*, i.img AS image                                     
-                    FROM `tour` t
-                    LEFT JOIN img_tour i ON t.id = i.id_tour
-                    WHERE t.status = 1
-                    ORDER BY t.id, i.id";
-        $list_tour = $this->tourModel->tour_status($sql);
+    //================code của tùng====================================
 
-        include 'views/admin/booking_manager/tour_has_ended/content.php';
+     function tour_has_ended() {
+        $notification = "";
+
+        // CHỈ LẤY TOUR CÓ BOOKING STATUS = 3 (đã kết thúc)
+        $sql = "SELECT t.*, i.img AS image
+                FROM tour t
+                JOIN book_tour bt ON bt.id_tour = t.id
+                LEFT JOIN img_tour i ON t.id = i.id_tour
+                WHERE bt.status = 3
+                AND DATE_ADD(t.date, INTERVAL t.number_of_days DAY) < CURDATE()
+                GROUP BY t.id
+                ORDER BY t.date DESC";
+
+        $tours = $this->tourModel->tour_status($sql);
+
+            // Gắn thông tin thanh toán cho từng tour
+        foreach ($tours as $tour) {
+            // Tổng tiền của các booking (book_tour.total_amount) status = 3
+            $revenue = $this->booktourModel->getRevenueForTour($tour->id, 3);
+
+            // Tổng số tiền đã thu (pay.amount_money) của các booking status = 3
+            $paid    = $this->payModel->getPaidAmountForTour($tour->id, 3);
+
+            // Còn nợ = doanh thu - đã thu, không cho âm
+            $debt = max($revenue - $paid, 0);
+
+            // Gắn vào object để view dùng
+            $tour->tong_doanh_thu = $revenue;
+            $tour->da_thu         = $paid;
+            $tour->con_no         = $debt;
+        }
+         include 'views/admin/booking_manager/tour_has_ended/content.php';
+    }
+
+
+
+public function tour_detail_view($id_lich_trinh)
+{
+    // Lấy thông tin tour đã kết thúc
+    $tour = $this->tourModel->get_tour_ended_detail($id_lich_trinh);
+
+    if (!$tour) {
+        die("Không tìm thấy tour đã kết thúc với id = " . (int)$id_lich_trinh);
+    }
+
+    // ===== LẤY HƯỚNG DẪN VIÊN CHO TOUR NÀY =====
+    // Dựa trên các booking trong book_tour
+    $guide = $this->booktourModel->getGuideForTour($tour->id);
+
+    // ===== TÍNH TỔNG DOANH THU & ĐÃ THU CHO TOUR NÀY =====
+    // status = 3: đã kết thúc
+    $doanh_thu = $this->booktourModel->getRevenueForTour($tour->id, 3);
+    $da_thu    = $this->payModel->getPaidAmountForTour($tour->id, 3);
+
+    // Gắn vào object $tour để view dùng
+    $tour->tong_tien_don_hang = $doanh_thu;   // Tổng doanh thu
+    $tour->tong_thuc_thu      = $da_thu;      // Đã thu
+    $tour->incidental_costs   = 0;            // Tạm thời chưa có cột chi phí phát sinh
+
+    // Gọi view
+    include 'views/admin/booking_manager/tour_has_ended/tour_detail_view.php';
+}
+
+
+
+    function tour_canceled() {
+        // 1. Gọi Model để lấy danh sách Tour đã hủy (status = 4)
+        // Lưu ý: Biến view của bạn tên là $tours, nên ở đây mình đặt là $tours cho khớp
+        // $tours = $this->tourModel->get_tours_by_status(4); 
+        $tours = $this->tourModel->get_canceled_tours_detail();
+        
+        // 2. Load View
+        include 'views/admin/booking_manager/tour_canceled/tour_canceled.php';
+    }
+
+        // Đánh dấu 1 tour đã thanh toán đủ
+    public function mark_tour_paid($id)
+    {
+        $tourId = (int)$id;
+
+        // 1. Lấy tất cả booking của tour này đã kết thúc (status = 3)
+        $bookings = $this->booktourModel->getBookingsByTourAndStatus($tourId, 3);
+
+        foreach ($bookings as $bk) {
+            $bookingId = (int)$bk->id;
+            $tong      = (float)$bk->total_amount;
+
+            // Đã thu cho từng booking
+            $daThu  = $this->payModel->getPaidAmountByBooking($bookingId);
+            $conNo  = $tong - $daThu;
+
+            // Nếu còn nợ > 0 thì tạo thêm 1 bản ghi pay để bù cho đủ
+            if ($conNo > 0.00001) {
+                $this->payModel->createAutoPayment(
+                    $bookingId,
+                    $conNo,
+                    'Auto: Đánh dấu đã tour đã được thanh toán'
+                );
+            }
+        }
+
+        // Quay lại trang chi tiết tour
+        header("Location: ?action=tour_detail_view&id=" . $tourId);
+        exit;
     }
 
 }

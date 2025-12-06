@@ -72,7 +72,7 @@
     <h1>Danh sách Tour</h1>
 
     <div class="tour-container">
-        <?php if(!empty($tours)): ?>
+        <?php if(!empty($tours)): ?> 
             <?php foreach($tours as $tour): ?>
                 <div class="tour">
                     <a href="?action=guide_booktour_detail&id=<?= $tour['id'] ?>" style="text-decoration:none; color: inherit;">

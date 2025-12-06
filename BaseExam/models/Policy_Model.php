@@ -1,7 +1,7 @@
 <?php
  class Policy{
     public $id;
-    public $type_policy;
+    public $title;
     public $content;
     public $id_tour;
  }
@@ -11,14 +11,16 @@ class Policy_Model extends BaseModel{
    protected $table = "policy";
 
     public function insert(array $data) {
-        $sql = "INSERT INTO policy (id_tour, content) VALUES (:id_tour, :content)";
+        $sql = "INSERT INTO policy (id_tour, title, content) VALUES (:id_tour, :title, :content)";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             ':id_tour' => $data['id_tour'],
+            ':title'   => $data['title'],
             ':content' => $data['content']
         ]);
-        return $this->pdo->lastInsertId(); // trả về id mới nếu cần
+        return $this->pdo->lastInsertId();
     }
+
 
 
     public function get_policy($tour_id){
@@ -55,5 +57,15 @@ class Policy_Model extends BaseModel{
     $stmt->execute(['id' => $id]);
     return $stmt->fetch(PDO::FETCH_OBJ); // hoặc FETCH_ASSOC
 }
+
+    public function delete_by_service_id($tour_id, $service_id) {
+        $sql = "DELETE FROM tour_supplier WHERE id_tour = :tour_id AND id = :service_id";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            'tour_id' => $tour_id,
+            'service_id' => $service_id
+        ]);
+    }
+
 }
 ?>

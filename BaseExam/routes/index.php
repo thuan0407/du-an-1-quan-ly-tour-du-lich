@@ -31,6 +31,10 @@ match ($action) {
     'guide_booktour'        => (new Tour_guide_Controller)->guide_booktour(),
     'guide_pending_tour'  => (new Tour_guide_Controller)->pending_tour(),
 
+    'rollcall'  => (new Tour_guide_Controller)->rollcall(),
+    'roll_call_form'  => (new Tour_guide_Controller)->roll_call_form(),
+    'roll_call_update'  => (new Tour_guide_Controller)->roll_call_update(),
+
 
     //test set lich
     // 'bookhdv'  => (new Test_Controller)->bookhdv(),
@@ -88,7 +92,8 @@ match ($action) {
     'tour_is_active'                     => (new Admin_Controller)->tour_is_active(),                        //quản lý tour đang hoạt động
     'tour_is_active_detail'              => (new Admin_Controller)->tour_is_active_detail($id),
 
-    'tour_has_ended'                     => (new Admin_Controller)->tour_has_ended(),                        //quản lý tour đã kết thúc
+    'tour_has_ended'                     => (new Admin_Controller)->tour_has_ended(),                        //quản lý tour đã kết thú
+    'tour_canceled'                      => (new Admin_Controller)->tour_canceled(), 
     
 
     'supplier_management'                => (new Admin_Controller)->supplier_management(),                    //quản lý nhà cung cấp

@@ -5,7 +5,6 @@ class Book_tour{
     public $total_amount;
     public $note;
     public $status;
-    public $id_user;
     public $quantity;
     public $id_departure_schedule;
     public $id_tour_guide;
@@ -43,7 +42,6 @@ class Book_tour_Model extends BaseModel{
                 $book_tour->total_amount          = $tt['total_amount'];
                 $book_tour->note                  = $tt['note'];
                 $book_tour->status                = $tt['status'];
-                $book_tour->id_user               = $tt['id_user'];
                 $book_tour->quantity              = $tt['quantity'];
                 $book_tour->id_departure_schedule = $tt['id_departure_schedule'];
                 $book_tour->id_tour_guide         = $tt['id_tour_guide'];
@@ -88,7 +86,6 @@ class Book_tour_Model extends BaseModel{
                 $book_tour->total_amount          = $data['total_amount'];
                 $book_tour->note                  = $data['note'];
                 $book_tour->status                = $data['status'];
-                $book_tour->id_user               = $data['id_user'];
                 $book_tour->quantity              = $data['quantity'];
                 $book_tour->id_departure_schedule = $data['id_departure_schedule'];
                 $book_tour->id_tour_guide         = $data['id_tour_guide'];
@@ -125,14 +122,13 @@ class Book_tour_Model extends BaseModel{
   public function create($book_tour){
     try {
         $sql = "INSERT INTO `book_tour` 
-            (`id`, `date`, `total_amount`, `note`, `status`, `id_user`, `quantity`, `id_departure_schedule`, `id_tour_guide`, `id_tour`, `number_of_days`, `number_of_nights`, `phone`, `customername`) 
+            (`id`, `date`, `total_amount`, `note`, `status`, `quantity`, `id_departure_schedule`, `id_tour_guide`, `id_tour`, `number_of_days`, `number_of_nights`, `phone`, `customername`) 
             VALUES (
                 NULL, 
                 '".$book_tour->date."', 
                 '".$book_tour->total_amount."', 
                 '".$book_tour->note."', 
                 '".$book_tour->status."', 
-                NULL, 
                 '".$book_tour->quantity."', 
                 '".$book_tour->id_departure_schedule."', 
                 '".$book_tour->id_tour_guide."', 
@@ -202,6 +198,37 @@ public function update_book_tour($book_tour)
         return $stmt->rowCount();
     }
 
+    public function update_book_tour_status($id, $status){
+        try{
+            $sql ="UPDATE book_tour SET status = :status WHERE id = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                ':id'      => $id,
+                ':status'  => $status
+            ]);
+            return $stmt->rowCount();
+        }catch(PDOException $err){
+            echo "Lỗi không thể update giá của bảng pay: " .$err->getMessage();
+            return null;
+        }
+    }
+
+
+    public function getTotalToursStatus($status) {                   //lấy tổng số tour chờ duyệt
+        try {
+            $sql = "SELECT COUNT(*) AS total FROM book_tour WHERE status = :status";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':status'=>$status]);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $data['total'] !== null ? (int)$data['total'] : 0;
+
+        } catch (PDOException $err) {
+            echo "Lỗi getTotalToursStatus1: " . $err->getMessage();
+            return 0;
+        }
+    }
+
 /////============= code của hùng ======================
 
 
@@ -221,7 +248,6 @@ public function update_book_tour($book_tour)
                 t.type_tour,
                 t.id_tourtype,
                 tt.tour_type_name AS tour_type_name,
-                t.id_user,
                 t.scope,
                 t.number_of_nights,
                 GROUP_CONCAT(DISTINCT i.img SEPARATOR '|') AS images,
@@ -276,9 +302,9 @@ public function update_book_tour($book_tour)
             $sql = "
                 INSERT INTO book_tour 
                 (customername, phone, date, total_amount, note, status,
-                number_of_days, number_of_nights, id_user, quantity,
+                number_of_days, number_of_nights, quantity,
                 id_departure_schedule, id_tour_guide, id_tour)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ";
 
             $stmt = $this->pdo->prepare($sql);
@@ -292,7 +318,6 @@ public function update_book_tour($book_tour)
                 1,  // status mặc định = 1 khi đặt tour từ HDV
                 $data['number_of_days'],
                 $data['number_of_nights'],
-                $data['id_user'],
                 $data['quantity'],
                 $data['id_departure_schedule'],
                 $data['id_tour_guide'],
@@ -324,7 +349,25 @@ public function update_book_tour($book_tour)
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function getBookingsByTourAndStatus($tourId, $status = 3)
+    {
+        try {
+            $sql = "SELECT *
+                    FROM book_tour
+                    WHERE id_tour = :tourId
+                      AND status  = :status";
 
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                ':tourId' => $tourId,
+                ':status' => $status
+            ]);
+
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
 }
 
 

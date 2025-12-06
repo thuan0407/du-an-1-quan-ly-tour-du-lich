@@ -61,7 +61,6 @@
 <body>
     <div class="content-wrapper ">
         <h2>Chi tiết hoạt động tour <?=$tour->name?></h2>
-        <div class="row">
             <div style="width:90%; margin-left:50px;">
                 <div class="timeline">
                     <?php foreach ($arr_merged as $index => $label): ?>
@@ -72,26 +71,83 @@
                     <?php endforeach; ?>
                 </div>
             </div>
+        <form action="" method="post" enctype="multipart/form-data">
+            <div class="row" style="padding:0 20px;">
+                <div class="col">
+                    <h3 style="color:red;">Giá: <?=number_format($book_tour->total_amount,0,'','.')?>VND</h3>
+                    <div class="d-flex">
+                        <label for="">Đã cọc</label>
+                        <input style="width:300px;" type="number" name="amount_money_pay"  value="<?=$pay->amount_money?>" class="form-control">
+                    </div>
+                    <label for="">Loại tour: <?=$tour_type->tour_type_name?></label> <br>
+                    <label for="">Khu vực: <?=$tour->type_tour ==1 ?"Nội địa":"Ngoại địa"?></label><br><br>
 
-            <div></div>
-            <h3><label for="" style="color:red;">Giá: <?=number_format($book_tour->total_amount,0,'','.')?>VND</label></h3>
+                    <h4>Hướng dẫn viên</h4>
+                    <label for="">Hướng dẫn viên: <?=$tour_guide->name?></label><br>
+                    <label for="">SDT HDV: 0<?=$tour_guide->phone_number?></label><br>
+                </div>
 
-            <label for="">Loại tour:</label> <br>
+                <div class="col">
+                    <h4>Khách hàng</h4>
+                    <label for="">Khách hàng: <?=$book_tour->customername?></label><br>
+                    <label for="">SDT khách hàng: 0<?=$book_tour->phone?></label> <br> <br>
 
-            <label for="">Khu vực: <?=$tour->type_tour ==1 ?"Nội địa":"Ngoại địa"?></label><br><br>
+                    <h4>Yêu cầu đặc biệt</h4>
+                    <table class="table table-hover">
+                        <tr>
+                            <th>STT</th>
+                            <th>Ngày</th>
+                            <th>Nội dung</th>
+                        </tr>
+                        <?php $i=0;
+                        foreach($list_special_request as $sp_r){ $i++?>
+                        <tr>
+                            <td><?=$i?></td>
+                            <td><?=$sp_r->date?></td>
+                            <td><?=$sp_r->content?></td>
+                        </tr>
+                        <?php
+                        }
+                        ?>
+                    </table>
+                  
+                    
+                </div>
 
-
-            <h4>Khách hàng</h4>
-            <label for="">Khách hàng: <?=$book_tour->customername?></label><br>
-            <label for="">SDT khách hàng: 0<?=$book_tour->phone?></label> <br> <br>
-
-            <h4>Hướng dẫn viên</h4>
-            <label for="">Hướng dẫn viên: <?=$tour_guide->name?></label><br>
-            <label for="">SDT HDV: 0<?=$tour_guide->phone_number?></label><br>
-
-            <button class="btn btn-danger">Hủy tour</button>
-
-        </div>
+              </div><br>
+               <div style="padding:0 50px;">
+                    <h4>Địa điểm</h4>
+                    <label for="">Điểm bắt đầu: <?=$departure_schedule->start_location?></label><br>
+                    <label for="">Điểm kết thúc: <?=$departure_schedule->end_location?></label><br><br>
+                    <h4>Chi tiết lịch trình</h4>
+                    <table class="table table-hover">
+                        <tr>
+                            <th>STT</th>
+                            <th>Ngày</th>
+                            <th>Nội dung</th>
+                        </tr>
+                        <?php $i=0;
+                        foreach($list_departure_schedule_details as $ds){$i++; ?>
+                        <tr>
+                            <td><?=$i?></td>
+                            <td><?=$ds->date?></td>
+                            <td><?=$ds->content?></td>
+                        </tr>
+                            <?php
+                        }
+                        ?>
+                    </table>
+                </div>
+              <?php
+              if($departure_schedule->status == 1):?>
+                    <button class="btn btn-danger form-control" type="submit" name="cancel" onclick="return confirm('Bạn có chắc là muốn xóa chuyến tour này không?')">Hủy tour</button>
+                <?php else:?>
+                    <button class="btn btn-success form-control" type="submit">Không thể hủy</button>
+                <?php endif?>
+                    
+ 
+              
+        </form>
 
 </div>
     

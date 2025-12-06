@@ -24,5 +24,18 @@
             return $this->pdo->lastInsertId();
         }
 
-    }
+        public function delete_contract($id_book_tour){
+            try{
+                $sql  ="DELETE FROM contract WHERE id_book_tour = :id_book_tour";
+                $stmt =$this->pdo->prepare($sql);
+                $stmt->execute([':id_book_tour'=>$id_book_tour]);
+                return $stmt->rowCount();
+            }catch(PDOException $err){
+            echo "Lỗi xóa hợp đồng: "  .$err->getMessage();
+            return false;
+           }
+        }
+
+
+}
     ?>

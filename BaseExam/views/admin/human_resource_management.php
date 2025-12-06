@@ -43,10 +43,11 @@ if (isset($_GET['msg'])) {
                 <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
                 <label>Khu vực:</label>
                 <select name="type_guide" class="form-control mb-3" onchange="this.form.submit()">
-                    <option value="" <?= !isset($_GET['type_guide']) ? 'selected' : '' ?>>--Chọn khu vực--</option>
-                    <option value="nội địa" <?= (isset($_GET['type_guide']) && $_GET['type_guide']=='nội địa') ? 'selected' : '' ?>>Nội địa</option>
-                    <option value="ngoại địa" <?= (isset($_GET['type_guide']) && $_GET['type_guide']=='ngoại địa') ? 'selected' : '' ?>>Ngoại địa</option>
+                    <option value="">--Chọn khu vực--</option>
+                    <option value="1" <?= (isset($_GET['type_guide']) && $_GET['type_guide']=='1') ? 'selected' : '' ?>>Nội địa</option>
+                    <option value="2" <?= (isset($_GET['type_guide']) && $_GET['type_guide']=='2') ? 'selected' : '' ?>>Ngoại địa</option>
                 </select>
+
 
                 <!-- Lọc theo ngôn ngữ -->
                 <label>Ngôn ngữ:</label>

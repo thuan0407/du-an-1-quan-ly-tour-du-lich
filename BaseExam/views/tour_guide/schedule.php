@@ -32,6 +32,7 @@
     <th>Ngày bắt đầu</th>
     <th>Ngày kết thúc</th>
     <th>Ghi chú</th>
+    <th>Điểm danh</th>
     <th>Chi tiết</th>
      <th>Trạng thái</th>   <!-- (sắp diễn ra, đang diễn ra, đã kết thúc) -->
     <th>Xem nhật ký tour</th>
@@ -61,6 +62,14 @@
       <td><?= htmlspecialchars($schedule->start_date) ?></td>
       <td><?= htmlspecialchars($schedule->end_date) ?></td>
       <td><?= htmlspecialchars($schedule->note) ?></td>
+
+      <td>
+    <a href="?action=rollcall&id_departure_schedule=<?= $schedule->id ?>" 
+       class="button journal-btn" 
+       style="background:#ff9800;">
+       Điểm danh
+    </a>
+  </td>
 
       <td>
         <a href="?action=schedule_detail&id=<?= $schedule->id ?>" 

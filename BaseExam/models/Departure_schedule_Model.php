@@ -139,22 +139,20 @@ class departure_schedule_Model extends BaseModel{
     }
 
 
-public function update_status_departurescheduleModel($id, $status){
-    try {
-        $sql = "UPDATE departure_schedule SET status = :status WHERE id = :id";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            ':status' => $status,
-            ':id'     => $id
-        ]);
-        return true;
-    } catch (PDOException $err) {
-        echo "Lỗi cập nhật trạng thái: " . $err->getMessage();
-        return false;
+    public function update_status_departurescheduleModel($id, $status){
+        try {
+            $sql = "UPDATE departure_schedule SET status = :status WHERE id = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([
+                ':status' => $status,
+                ':id'     => $id
+            ]);
+            return true;
+        } catch (PDOException $err) {
+            echo "Lỗi cập nhật trạng thái: " . $err->getMessage();
+            return false;
+        }
     }
-}
-
-
 
 
 }

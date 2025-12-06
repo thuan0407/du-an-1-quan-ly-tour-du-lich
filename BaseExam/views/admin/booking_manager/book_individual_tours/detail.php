@@ -145,19 +145,6 @@
                     <input type="text" name="departure_schedule_note" class="form-control" placeholder="Có thể bỏ trống"><br>
                 </div>
 
-                <h4>Chi tiết mỗi ngày LKH</h4>
-                <div>
-                    <div id="plan">
-                        <div class="detail_plan d-flex gap-2 mt-2">
-                            <input type="date" name="details_every_day[]" class="form-control" required>
-                            <input type="text" placeholder="Nội dung....." class="form-control" name="detailed_content_every_day[]" required>
-                            <button type="button" class="btn btn-danger" onclick="removePlan(this)">Xóa</button>
-                        </div>
-                    </div>
-
-                    <button type="button" class="btn btn-success mt-2" onclick="addPlan()">Thêm</button>
-                </div>
-
                 <h4>Thanh toán</h4>
                 <div>
                     <label for="">Hình thức thanh toán</label>
@@ -173,13 +160,24 @@
                     <input type="text" name="pay_note" class="form-control" placeholder="Có thể bỏ trống" > <br>
                 </div>
 
-                <div>
-                    <a href="?action=booking_tour" class="btn btn-danger">Quay lại</a>
-                    <button type="submit" name="order_tour" class="btn btn-primary">Đặt tour</button>
+            </div>
+                <h4>Chi tiết mỗi ngày LKH</h4>
+                <div >
+                    <div id="plan">
+                        <div class="detail_plan d-flex gap-2 mt-2">
+                            <input type="date" name="details_every_day[]" class="form-control" style="width:300px;" required>
+                            <input type="text" placeholder="Nội dung....." class="form-control" name="detailed_content_every_day[]" required>
+                            <button type="button" class="btn btn-danger" onclick="removePlan(this)">Xóa</button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-success mt-2" onclick="addPlan()">Thêm</button>
                 </div>
 
-            </div>
-            
+                <div class="d-flex">
+                    <a href="?action=booking_tour" class="btn btn-danger form-control" >Quay lại</a>
+                    <button type="submit" name="order_tour" class="btn btn-primary form-control" >Đặt tour</button>
+                </div>
 
     </form>
 

@@ -2,119 +2,118 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Navbar Offcanvas - Quản lý Tour</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thống kê Tour</title>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f6fa;
+    margin: 0;
+  }
+
+  .content-wrapper { padding: 20px; }
+
+  h2 { color:#2f3640; margin-bottom:20px; }
+
+  .stat-box {
+    display:flex; gap:15px; flex-wrap:wrap;
+  }
+
+  .stat-card {
+    flex:1;
+    min-width:180px;
+    padding:18px;
+    border-radius:12px;
+    color:white;
+    text-align:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.15);
+    transition:.2s;
+  }
+  .stat-card:hover {
+    transform:translateY(-5px);
+    box-shadow:0 6px 15px rgba(0,0,0,0.25);
+  }
+  .stat-card i { font-size:28px; margin-bottom:8px; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
+
 <div class="content-wrapper">
- 
-  <!-- Nội dung chính -->
-  <div class="container mt-4">
-    <h2>📊 Bảng điều khiển</h2>
-    <p>Nhấn nút ☰ để mở thanh menu bên trái.</p>
-  </div>
   
-    <!-- Nội dung -->
-  <div class="content">
-    <h2 class="mb-4">📊 Thống kê tổng quan</h2>
-    
+  <h2>📊 Bảng Thống kê</h2>
+  <div class="stat-box">
 
-    <div class="row">
-      <div class="col-md-6 mb-4">
-        <div class="card">
-          <div class="card-header bg-primary text-white">
-            <i class="fa-solid fa-chart-column"></i> Doanh thu tour theo tháng
-          </div>
-          <div class="card-body">
-            <canvas id="revenueChart" height="200"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 mb-4">
-        <div class="card">
-          <div class="card-header bg-success text-white">
-            <i class="fa-solid fa-chart-line"></i> Người dùng mới theo tuần
-          </div>
-          <div class="card-body">
-            <canvas id="userChart" height="200"></canvas>
-          </div>
-        </div>
-      </div>
+    <div class="stat-card" style="background:#f1c40f;">
+      <i class="fas fa-wallet"></i>
+      <div>Tổng doanh thu</div>
+      <strong><?= number_format($total_amount->total_money, 0, ',', '.') ?> VND</strong>
     </div>
+
+    <div class="stat-card" style="background:#3498db;">
+      <i class="fas fa-clock"></i>
+      <div>Tour chờ duyệt</div>
+      <strong><?= $total_book_tour_1 ?></strong>
+    </div>
+
+    <div class="stat-card" style="background:#2ecc71;">
+      <i class="fas fa-route"></i>
+      <div>Tour đang hoạt động</div>
+      <strong><?= $total_book_tour_2 ?></strong>
+    </div>
+
+    <div class="stat-card" style="background:#e74c3c;">
+      <i class="fas fa-check"></i>
+      <div>Tour đã kết thúc</div>
+      <strong><?= $total_book_tour_3 ?></strong>
+    </div>
+
   </div>
+
+  <h2 class="mt-4">📈 Doanh thu theo tháng</h2>
+  <canvas id="revenueChart" height="120"></canvas>
+
 </div>
 
-  <script>
-    const sidebar = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('sidebarToggle');
-    const overlay = document.getElementById('overlay');
+<script>
+const labels = <?= $labels ?>;
+const dataRevenue = <?= $data ?>;
 
-    toggleBtn.addEventListener('click', () => {
-      if (window.innerWidth <= 991) {
-        // Mobile: mở sidebar trượt ra
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-      } else {
-        // Desktop: thu gọn/mở rộng
-        sidebar.classList.toggle('collapsed');
-      }
-    });
-
-    overlay.addEventListener('click', () => {
-      sidebar.classList.remove('active');
-      overlay.classList.remove('active');
-    });
-
-    // --- Biểu đồ cột ---
-    const ctxRevenue = document.getElementById('revenueChart');
-    new Chart(ctxRevenue, {
-      type: 'bar',
-      data: {
-        labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
-        datasets: [{
-          label: 'Doanh thu (triệu VNĐ)',
-          data: [120, 150, 180, 220, 300, 400],
-          backgroundColor: '#0d6efd'
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'top' },
-          title: { display: true, text: 'Biểu đồ doanh thu tour' }
+new Chart(document.getElementById("revenueChart"), {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Doanh thu (VND)',
+      data: dataRevenue,
+      borderColor: 'rgba(30,144,255,1)',
+      backgroundColor: 'rgba(30,144,255,0.2)',
+      tension: 0.3,
+      fill:true,
+      pointRadius:4,
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 2000000000,
+        ticks:{
+          callback:(v)=>v.toLocaleString('vi-VN')+"₫"
         }
       }
-    });
-
-    // --- Biểu đồ đường ---
-    const ctxUser = document.getElementById('userChart');
-    new Chart(ctxUser, {
-      type: 'line',
-      data: {
-        labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'],
-        datasets: [{
-          label: 'Người dùng mới',
-          data: [45, 60, 80, 90],
-          fill: true,
-          borderColor: '#198754',
-          backgroundColor: 'rgba(25,135,84,0.2)',
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'top' },
-          title: { display: true, text: 'Biểu đồ người dùng mới' }
-        }
-      }
-    });
-  </script>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    }
+  }
+});
+</script>
 
 </body>
 </html>

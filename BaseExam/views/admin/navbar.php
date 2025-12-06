@@ -11,6 +11,9 @@
   <!-- Bootstrap & Font Awesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- thư viện icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">  
+
 
   <style>
 
@@ -62,6 +65,12 @@
         padding-top: 20px; /* tránh navbar che nội dung */
         transition: margin-left 0.3s ease;
     }
+    /* sáng theo các mục khi đc click */
+    #sidebar a.active {     
+    background-color: #154a7fff !important;
+    color: #ffffffff !important;
+}
+
   </style>
 </head>
 <body >
@@ -92,7 +101,9 @@
     <a href="?action=tour_manager_content"><i class="fa-solid fa-ticket"></i> Quản lý tour</a>
     <a href="?action=booking_tour"><i class="fa-solid fa-ticket"></i> Quản lý đặt tour</a>
     <hr>
-    <a href="?action=logout_admin" onclick="return confim('Bạn có chắc là muốn Đăng xuất không?')">Đăng xuất</a>
+  <a href="?action=logout_admin" onclick="return confirm('Bạn có chắc là muốn Đăng xuất không?')">
+    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+ </a>
 
     <!-- Dropdown tài khoản -->
     <!-- <div class="mt-3 px-3">
@@ -140,6 +151,26 @@
       }
     });
   </script>
+<script>
+    const menuLinks = document.querySelectorAll("#sidebar a");
+
+    // Gán active khi click
+    menuLinks.forEach(link => {
+        link.addEventListener("click", () => {
+            localStorage.setItem("activeMenu", link.getAttribute("href"));
+        });
+    });
+
+    // Khi load lại trang → set mục active
+    const activeMenu = localStorage.getItem("activeMenu");
+    if (activeMenu) {
+        menuLinks.forEach(link => {
+            if (link.getAttribute("href") === activeMenu) {
+                link.classList.add("active");
+            }
+        });
+    }
+</script>
 
 </body>
 </html>

@@ -91,5 +91,6 @@ class Tour_diary_Model extends BaseModel{
     //         return false;
     //     }
     // }
+    
 }
 ?>

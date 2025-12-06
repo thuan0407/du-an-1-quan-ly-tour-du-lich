@@ -58,7 +58,13 @@
             <td><?= $index + 1 ?></td>
             <td><?= htmlspecialchars($detail->CusName) ?></td>
             <td>0<?= htmlspecialchars($detail->CusPhone) ?></td>
-            <td><?= htmlspecialchars($cust->list_customer) ?></td>
+
+          <td>
+              <img src="<?= BASE_URL . $cust->list_customer ?>"
+                  style="width:120px; cursor:pointer;"
+                  onclick="showImg(this.src)">
+          </td>
+
             <td><?= htmlspecialchars($cust->quantity) ?></td>
             <td><?= nl2br(htmlspecialchars($cust->note)) ?></td>
           </tr>
@@ -167,4 +173,18 @@
         font-weight: bold;
         color: #28a745;
     }
+  
 </style>
+
+
+<div id="popup" onclick="this.style.display='none'" 
+     style="display:none; position:fixed; inset:0; background:#000c; z-index:9999;">
+    <img id="popupImg" style="max-width:90%; max-height:90%; margin:auto; display:block;">
+</div>
+
+<script>
+function showImg(src){
+    popupImg.src = src;
+    popup.style.display = "flex";
+}
+</script>

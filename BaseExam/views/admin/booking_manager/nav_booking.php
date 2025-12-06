@@ -14,6 +14,7 @@
             <a href="?action=waiting_for_approval" class="col btn btn-danger">Tour chờ duyệt</a>
             <a href="?action=tour_is_active"       class="col btn btn-primary">Tour đang hoạt động</a>
             <a href="?action=tour_has_ended"       class="col btn btn-warning">Tour đã kết thúc</a>
+            <a href="?action=tour_canceled"       class="col btn btn-dark">Tour đã hủy</a>
 
             
         </div>
