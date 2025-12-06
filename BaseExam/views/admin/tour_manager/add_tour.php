@@ -16,14 +16,11 @@
             padding-bottom: 50px;
         }
 
-        /* Container chính của form */
-        .content-wrapper.container {
-            max-width: 1200px;
-            margin-top: 40px !important;
+        /* Container chính */
+        .content-wrapper {
             padding: 30px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
 
         /* Tiêu đề form */
@@ -59,17 +56,15 @@
             color: #555;
         }
 
-        /* Bố cục cho nhóm Số Ngày/Đêm và Số Chỗ/Giá (Sửa lỗi d-flex cũ) */
+        /* Bố cục cho nhóm Số Ngày/Đêm và Số Chỗ/Giá (Dùng class form-group-inline) */
         .form-group-inline {
             display: flex;
             gap: 15px;
-            /* Cần sửa lại HTML để nhóm 2x2 */
-            /* Hiện tại đang là 4 cột, tôi sẽ tối ưu CSS để chúng tự chia 2x2 */
-            flex-wrap: wrap; /* Cho phép xuống dòng */
+            flex-wrap: wrap; 
         }
         .form-group-inline .mb-3 {
-            flex: 1 1 calc(50% - 7.5px); /* Chia thành 2 cột trên 1 hàng */
-            min-width: 150px; /* Đảm bảo trên màn hình nhỏ */
+            flex: 1 1 calc(50% - 7.5px); 
+            min-width: 150px; 
         }
         
         /* Các trường input/select/textarea cơ bản */
@@ -90,8 +85,8 @@
             resize: vertical;
         }
 
-        /* Nhóm các item có nút Xóa (Ảnh, Địa điểm, Dịch vụ) */
-        .img-item, .address-item, .supplier-item, .detail_plan, .policy-item > .d-flex {
+        /* Nhóm các item có nút Xóa (Ảnh, Địa điểm, Dịch vụ, Lịch trình) */
+        .img-item, .address-item, .supplier-item, .detail_plan {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -102,35 +97,23 @@
             background-color: #fcfcfc;
         }
         
-        /* Đảm bảo input chiếm hết không gian khi không có nút Xóa */
         .img-item input[type="file"],
         .address-item input[type="text"],
         .supplier-item select,
-        .detail_plan textarea,
-        .policy-item > .d-flex textarea {
+        .detail_plan textarea {
             flex-grow: 1;
             margin-bottom: 0 !important;
         }
 
         /* Dùng cho phần chi tiết mỗi ngày */
-        .detail_plan {
+        #plan .detail_plan {
             border: none;
             padding: 0;
             background-color: transparent;
             border-radius: 0;
         }
 
-
-        /* Styling cho các nút thêm/xóa */
-        .btn {
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: background-color 0.3s, transform 0.1s;
-            white-space: nowrap; 
-        }
-
-        /* Các tiêu đề nhỏ (Chi tiết mỗi ngày, Chính sách) */
+        /* Các tiêu đề nhỏ */
         h5 {
             margin-top: 30px;
             margin-bottom: 15px;
@@ -168,7 +151,7 @@
             margin-left: 10px;
         }
 
-        /* --- Responsive cơ bản --- */
+        /* Responsive */
         @media (max-width: 992px) {
             .modal-body.row {
                 grid-template-columns: 1fr;
@@ -187,7 +170,7 @@
                 flex-direction: column;
                 align-items: stretch;
             }
-            .img-item input, .address-item input, .supplier-item select, .detail_plan textarea, .policy-item > .d-flex textarea {
+            .img-item input, .address-item input, .supplier-item select, .detail_plan textarea {
                 width: 100%;
                 margin-bottom: 5px !important;
             }
@@ -200,7 +183,7 @@
     </style>
 </head>
 <body>
-<div class="content-wrapper container mt-4">
+<div class="content-wrapper">
     <form action="" method="post" enctype="multipart/form-data">
         <div class="modal-header">
             <h5 class="modal-title">Tạo tour mới</h5>
@@ -288,41 +271,41 @@
         </div>
 
         <div>
-             <div class="mb-3">
-                    <label>Mô tả:</label>
+            <div class="mb-3">
+                <label>Mô tả:</label>
                 <textarea
                      placeholder="Nội dung..." class="form-control" name="describe" rows="5" required>
                 </textarea>
             </div><br>
 
             <h5>Chi tiết mỗi ngày LKH</h5> 
-                <div >
-                    <div id="plan">
-                        <div class="detail_plan d-flex gap-2 mt-2">
-                            <textarea placeholder="Nội dung..." class="form-control" name="detailed_content_every_day[]" rows="3" required></textarea>
-                            <button type="button" class="btn btn-danger" onclick="removePlan(this)">Xóa</button>
-                        </div>
+            <div >
+                <div id="plan">
+                    <div class="detail_plan d-flex gap-2 mt-2">
+                        <textarea placeholder="Nội dung..." class="form-control" name="detailed_content_every_day[]" rows="3" required></textarea>
+                        <button type="button" class="btn btn-danger" onclick="removePlan(this)">Xóa</button>
                     </div>
+                </div>
 
-                    <button type="button" class="btn btn-success mt-2" onclick="addPlan()">Thêm</button>
-                </div><br><br>
+                <button type="button" class="btn btn-success mt-2" onclick="addPlan()">Thêm</button>
+            </div><br><br>
 
             <div class="mb-3">
-                    <h5>Chính sách</h5>
-                    <div id="policys-item">
-                        <div class="policy-item mb-2">
-                            <input type="text" class="form-control" style="margin:10px 0" name="title[]" placeholder="Tiêu đề..." required> <br>
-                            <div class="d-flex">
-                                <textarea  
-                                    placeholder="Nội dung..." class="form-control" name="content[]" rows="3" required>
-                                </textarea>
+                <h5>Chính sách</h5>
+                <div id="policys-item">
+                    <div class="policy-item mb-2">
+                        <input type="text" class="form-control" style="margin:10px 0" name="title[]" placeholder="Tiêu đề..." required> <br>
+                        <div class="d-flex">
+                            <textarea  
+                                placeholder="Nội dung..." class="form-control" name="content[]" rows="3" required>
+                            </textarea>
 
-                                <button type="button" class="btn btn-danger ms-2" onclick="removeItem(this)">Xóa</button>
-                            </div>
+                            <button type="button" class="btn btn-danger ms-2" onclick="removeItem(this)">Xóa</button>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-success mt-2" onclick="add_policy()">Thêm chính sách</button>
                 </div>
+                <button type="button" class="btn btn-success mt-2" onclick="add_policy()">Thêm chính sách</button>
+            </div>
         </div>
 
         <div class="mt-3">
@@ -333,7 +316,7 @@
 </div>
 
 <script>
-    // Hàm tạo nút Xóa (giúp code gọn hơn)
+    // Hàm tạo nút Xóa (giữ nguyên)
     function createDeleteButton() {
         let deleteBtn = document.createElement("button");
         deleteBtn.setAttribute("type", "button");
@@ -343,19 +326,21 @@
         return deleteBtn;
     }
 
-    // 1. Thêm Ảnh: Thêm nút Xóa cho bản clone
+    // ⭐ SỬA LỖI 1: Hàm Thêm Ảnh (Đảm bảo bản clone không có nút xóa gốc và thêm nút mới)
     function add_img() {
         let container = document.getElementById("imgs-item");
         let template  = container.querySelector(".img-item");
+        // CloneNode(true) sao chép toàn bộ nội dung
         let clone = template.cloneNode(true);
         
         clone.querySelector("input[type='file']").value = ""; 
         
-        clone.appendChild(createDeleteButton()); // ⭐ THÊM NÚT XÓA ⭐
+        // Thêm nút xóa vào bản clone
+        clone.appendChild(createDeleteButton());
         container.appendChild(clone);
     }
 
-    // 2. Thêm Địa điểm: Thêm nút Xóa cho bản clone
+    // ⭐ SỬA LỖI 2: Hàm Thêm Địa điểm
     function add_address() {
         let container = document.getElementById("address_s-item");
         let template  = container.querySelector(".address-item");
@@ -363,11 +348,12 @@
         
         clone.querySelector("input").value = "";
         
-        clone.appendChild(createDeleteButton()); // ⭐ THÊM NÚT XÓA ⭐
+        // Thêm nút xóa vào bản clone
+        clone.appendChild(createDeleteButton());
         container.appendChild(clone);
     }
 
-    // 3. Thêm Dịch vụ: Thêm nút Xóa cho bản clone
+    // ⭐ SỬA LỖI 3: Hàm Thêm Dịch vụ
     function add_supplier() {
         let container = document.getElementById("supplier_s-item");
         let template  = container.querySelector(".supplier-item");
@@ -375,34 +361,37 @@
         
         clone.querySelector("select").selectedIndex = 0;
 
-        clone.appendChild(createDeleteButton()); // ⭐ THÊM NÚT XÓA ⭐
+        // Thêm nút xóa vào bản clone
+        clone.appendChild(createDeleteButton()); 
         container.appendChild(clone);
     }
     
-    // 4. Thêm Chính sách: giữ nguyên (luôn có nút xóa)
+    // 4. Thêm Chính sách (Giữ nguyên)
     function add_policy() {
         let container = document.getElementById("policys-item");
         let template  = container.querySelector(".policy-item");
         let clone = template.cloneNode(true);
-        // Reset tiêu đề và nội dung
         clone.querySelector("input[type='text']").value = "";
         clone.querySelector("textarea").value = "";
+        // Cần đảm bảo rằng nút xóa luôn được clone (vì nút xóa có sẵn trong template HTML)
         container.appendChild(clone);
     }
 
-    // ⭐ 5. Xóa Tổng quát (Đã sửa lỗi Chính sách) ⭐
+    // ⭐ SỬA LỖI 5: Xóa Tổng quát (Hàm này có thể bị lỗi cú pháp/logic trước đó) ⭐
     function removeItem(btn) {
-        // Kiểm tra xem nút xóa có nằm trong policy-item không
+        // Xóa item Chính sách (Policy-item phức tạp hơn)
         let policyItem = btn.closest(".policy-item");
         if (policyItem) {
-            policyItem.remove(); // Xóa toàn bộ khối chính sách
+             // Cần xác nhận rằng nút Xóa không phải là của Lịch trình (detail_plan) nếu chúng nằm gần nhau
+            if (btn.closest(".d-flex") && btn.closest(".policy-item")) {
+                btn.closest(".policy-item").remove();
+            }
             return;
         }
 
-        // Nếu không phải Chính sách, tìm item gần nhất (Ảnh, Địa điểm, Dịch vụ)
-        let itemToRemove = btn.closest(".img-item, .address-item, .supplier-item");
+        // Xóa item Ảnh, Địa điểm, Dịch vụ (dùng d-flex để tìm phần tử cha gần nhất)
+        let itemToRemove = btn.closest(".img-item, .address-item, .supplier-item, .detail_plan");
         
-        // Đảm bảo item này là bản clone (chỉ các bản clone mới có nút Xóa)
         if(itemToRemove) {
             itemToRemove.remove();
         }
@@ -411,21 +400,23 @@
     // 6. Thêm Lịch khởi hành
     function addPlan() {
         let plan = document.getElementById("plan");
-        let item = plan.querySelector(".detail_plan").cloneNode(true);
-        item.querySelector("textarea").value = "";
-        plan.appendChild(item);
+        // Lấy template từ div.detail_plan đầu tiên
+        let template = plan.querySelector(".detail_plan");
+        let clone = template.cloneNode(true);
+        
+        // Reset nội dung textarea
+        clone.querySelector("textarea").value = "";
+        
+        plan.appendChild(clone);
     }
 
     // 7. Xóa Lịch khởi hành (Đảm bảo ít nhất 1)
     function removePlan(btn) {
         let item = btn.parentElement;
-
-        if (document.querySelectorAll(".detail_plan").length === 1) {
+        if (document.querySelectorAll("#plan .detail_plan").length === 1) {
             alert("Phải có ít nhất 1 ngày hoạt động!");
             return;
         }
         item.remove();
     }
 </script>
-</body>
-</html>

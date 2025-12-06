@@ -45,11 +45,17 @@ class Policy_Model extends BaseModel{
         return $stmt->fetchAll(PDO::FETCH_ASSOC); // trả về id + content
     }
 
-    public function update_policy($id, $new_content) {
-        $stmt = $this->pdo->prepare("UPDATE policy SET content = ? WHERE id = ?");
-        $stmt->execute([$new_content, $id]);
-        return $stmt->rowCount(); // trả về số row bị ảnh hưởng
+    public function update_policy($id, $title, $content) {
+        $sql = "UPDATE {$this->table} SET title = :title, content = :content WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':title'   => $title,
+            ':content' => $content,
+            ':id'      => $id
+        ]);
+        return $stmt->rowCount();
     }
+
 
 
     public function getById($id) {                                                    //lấy dữ liệu theo id

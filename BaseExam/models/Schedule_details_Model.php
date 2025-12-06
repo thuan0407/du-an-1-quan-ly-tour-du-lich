@@ -6,6 +6,7 @@ class Schedule_details{
 }
 
 class Schedule_details_Model extends BaseModel{
+      protected $table = 'schedule_details'; // thêm dòng này
     public function addDailyPlan($data) {
 
         $sql = "INSERT INTO schedule_details
@@ -23,10 +24,27 @@ class Schedule_details_Model extends BaseModel{
     // HÀM XÓA LỊCH TRÌNH THEO TOUR ID
     public function delete_daily($tour_id) {
         $sql = "DELETE FROM schedule_details WHERE id_tour = :tour_id";
-
         $stmt = $this->pdo->prepare($sql);
-
         return $stmt->execute(['tour_id' => $tour_id]);
     }
+
+
+    public function find_by_tour($tour_id) {
+        $sql = "SELECT * FROM schedule_details WHERE id_tour = :tour_id ORDER BY id ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['tour_id' => $tour_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Thêm mới 1 lịch trình
+    public function insert($data) {
+            $sql = "INSERT INTO {$this->table} (id_tour, content) VALUES (:id_tour, :content)";
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([
+                'id_tour' => $data['id_tour'],
+                'content' => $data['content']
+            ]);
+        }
+
 }
 ?>

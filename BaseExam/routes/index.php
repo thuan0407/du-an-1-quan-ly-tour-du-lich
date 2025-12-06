@@ -73,11 +73,11 @@ match ($action) {
     'search_tour_guide'                  => (new Admin_Controller)->search_tour_guide(),
 
 
-    'tour_manager_content'               => (new Admin_Controller)->tour_manager_content(),                 // quản lý tour
-    'add_tour'                           => (new Admin_Controller)->add_tour(),                      
-    'delete_tour'                        => (new Admin_Controller)->delete_tour($id),
-    'tour_detail'                        => (new Admin_Controller)->tour_detail($id),
-    'search_tour'                        => (new Admin_Controller)->search_tour(),
+    'tour_manager_content'               => (new Tour_Controller)->tour_manager_content(),                 // quản lý tour
+    'add_tour'                           => (new Tour_Controller)->add_tour(),                      
+    'delete_tour'                        => (new Tour_Controller)->delete_tour($id),
+    'tour_detail'                        => (new Tour_Controller)->tour_detail($id),
+    'search_tour'                        => (new Tour_Controller)->search_tour(),
 
 
     'booking_tour'                       => (new Admin_Controller)->booking_tour(),                          //quản lý đặt tour lẻ
