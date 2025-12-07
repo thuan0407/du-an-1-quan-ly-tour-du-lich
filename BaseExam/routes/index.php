@@ -42,22 +42,6 @@ match ($action) {
     // 'save_schedule' => (new Test_Controller)->save_schedule(),
 
 
-    'special_request_index'    => (new Tour_guide_Controller)->special_request_index(),
-    'special_request_add'      => (new Tour_guide_Controller)->special_request_add(),
-    'special_request_edit'     => (new Tour_guide_Controller)->special_request_edit(),
-    'update_special_request_status' => (new Tour_guide_Controller)->update_special_request_status(),
-
-    'guide_Alltour' => (new Tour_guide_Controller)->guide_Alltour(),
-    'guide_booktour_detail' => (new Tour_guide_Controller)->guide_booktour_detail(),
-    'guide_booktour'        => (new Tour_guide_Controller)->guide_booktour(),
-    'guide_pending_tour'  => (new Tour_guide_Controller)->pending_tour(),
-
-
-    //test set lich
-    // 'bookhdv'  => (new Test_Controller)->bookhdv(),
-    // 'add_schedule' => (new Test_Controller)->add_schedule(),
-    // 'save_schedule' => (new Test_Controller)->save_schedule(),
-
 
     'home_admin'                         => (new Admin_Controller)->home_admin(),                    //phía admin
     'tour_catalog_management'            => (new Admin_Controller)->tour_catalog_management(),
@@ -80,20 +64,16 @@ match ($action) {
     'search_tour'                        => (new Tour_Controller)->search_tour(),
 
 
-    'booking_tour'                       => (new Admin_Controller)->booking_tour(),                          //quản lý đặt tour lẻ
-    'search_booking_tour'                => (new Admin_Controller)->search_booking_tour(),
-    'booking_individual_tours_detail'    => (new Admin_Controller)->booking_individual_tours_detail($id),
+    'booking_tour'                       => (new Booking_controller)->booking_tour(),                          //quản lý đặt tour lẻ
+    'search_booking_tour'                => (new Booking_controller)->search_booking_tour(),
+    'booking_individual_tours_detail'    => (new Booking_controller)->booking_individual_tours_detail($id),
 
-
-    'waiting_for_approval'               => (new Admin_Controller)->waiting_for_approval(),                  //quản lý tour đang chờ duyệt
-    'waiting_for_approval_detail'        => (new Admin_Controller)->waiting_for_approval_detail($id),
-    'waiting_for_approval_delete'        => (new Admin_Controller)->waiting_for_approval_delete($id),
-
-    'tour_is_active'                     => (new Admin_Controller)->tour_is_active(),                        //quản lý tour đang hoạt động
-    'tour_is_active_detail'              => (new Admin_Controller)->tour_is_active_detail($id),
-
-    'tour_has_ended'                     => (new Admin_Controller)->tour_has_ended(),                        //quản lý tour đã kết thú
-    'tour_canceled'                      => (new Admin_Controller)->tour_canceled(), 
+    'tour_is_active'                     => (new Booking_controller)->tour_is_active(),                        //quản lý tour đang hoạt động
+    'tour_is_active_detail'              => (new Booking_controller)->tour_is_active_detail($id),
+    'comtomer_list'                      => (new Booking_controller)->comtomer_list($id),                      // danh sách hàng
+   
+    'tour_has_ended'                     => (new Booking_controller)->tour_has_ended(),                        //quản lý tour đã kết thú
+    'tour_canceled'                      => (new Booking_controller)->tour_canceled(), 
     
 
     'supplier_management'                => (new Admin_Controller)->supplier_management(),                    //quản lý nhà cung cấp

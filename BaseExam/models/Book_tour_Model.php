@@ -66,6 +66,52 @@ class Book_tour_Model extends BaseModel{
     }
 
 
+    public function get_book_tour_all_125(){   //lấy các booktour có trạng thái là 1,2,5              
+        try{
+            $sql = "
+                SELECT MAX(p.status) AS pay_status, bk.*, t.name as tour_name, GROUP_CONCAT(i.img SEPARATOR '|') as images
+                FROM `book_tour` as bk
+                JOIN tour as t ON bk.id_tour = t.id
+                LEFT JOIN img_tour i ON t.id = i.id_tour
+                LEFT JOIN pay p ON p.id_book_tour = bk.id
+                WHERE bk.status IN (1, 2, 5)
+                GROUP BY bk.id
+            ";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $list = [];
+            foreach($data as $tt){
+                $book_tour = new Book_tour();
+                $book_tour->id                    = $tt['id'];
+                $book_tour->date                  = $tt['date'];
+                $book_tour->total_amount          = $tt['total_amount'];
+                $book_tour->note                  = $tt['note'];
+                $book_tour->status                = $tt['status'];
+                $book_tour->quantity              = $tt['quantity'];
+                $book_tour->id_departure_schedule = $tt['id_departure_schedule'];
+                $book_tour->id_tour_guide         = $tt['id_tour_guide'];
+                $book_tour->id_tour               = $tt['id_tour'];
+                $book_tour->number_of_days        = $tt['number_of_days'];
+                $book_tour->number_of_nights      = $tt['number_of_nights'];
+                $book_tour->phone                 = $tt['phone'];
+                $book_tour->customername          = $tt['customername'];
+                $book_tour->tour_name             = $tt['tour_name'];
+                $book_tour->pay_status            = $tt['pay_status'];
+                $book_tour->images                = !empty($tt['images']) ? explode('|', $tt['images']) : [];
+
+                $list[] = $book_tour;
+            }
+
+            return $list;
+
+        } catch (PDOException $err) {
+            echo "Lỗi truy vấn sản phẩm: " . $err->getMessage();
+            return [];
+        }
+    }
+
     public function get_book_tour($id){              
         try{
             $sql = "
@@ -227,6 +273,15 @@ public function update_book_tour($book_tour)
             echo "Lỗi getTotalToursStatus1: " . $err->getMessage();
             return 0;
         }
+    }
+
+    public function update_tour_guide($id_tour_guide,$id){
+        $sql = "UPDATE book_tour SET id_tour_guide = :id_tour_guide  WHERE id = :id";
+        $stmt= $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':id'           =>$id,
+            ':id_tour_guide'=>$id_tour_guide
+        ]);
     }
 
 /////============= code của hùng ======================

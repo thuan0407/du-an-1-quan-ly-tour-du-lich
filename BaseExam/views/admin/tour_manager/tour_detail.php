@@ -284,18 +284,21 @@
                     <button type="button" class="btn btn-success btn-sm" onclick="add_policy()">Thêm chính sách</button>
                 </div>
 
+
                 <div class="mb-3" id="schedule-item">
                     <label>Lịch trình tour</label>
                     <?php foreach($schedules as $index => $schedule): ?>
-                        <div class="d-flex mb-2 align-items-start">
-                            <span class="me-2 fw-bold">Ngày <?= $index + 1 ?>:</span>
-                            <textarea name="content[]" class="form-control me-2" placeholder="Nội dung..."><?= htmlspecialchars($schedule['content'] ?? '') ?></textarea>
+                        <div class="d-flex mb-2 align-items-start schedule-row">    
+                            <!-- ID Lịch trình -->
+                            <input type="hidden" name="schedule_id[]" value="<?= $schedule['id'] ?>">
+                            <span class="me-2 fw-bold">Ngày <?= $index + 1 ?>:</span>     
+                            <textarea name="schedule_content[]" class="form-control me-2" placeholder="Nội dung..."><?= htmlspecialchars($schedule['content'] ?? '') ?></textarea>       
                             <button type="button" class="btn btn-danger" onclick="removeItem(this)">Xóa</button>
                         </div>
                     <?php endforeach; ?>
                 </div>
-
                 <button type="button" class="btn btn-success mt-2" onclick="add_schedule()">Thêm ngày</button>
+
 
 
                 <div class="mt-3">
@@ -307,30 +310,47 @@
 </div>
 
 <script>
-// Hàm xóa tổng quát
-function removeItem(btn){
-    // Xóa item ảnh (cần xử lý riêng vì nó có input hidden)
-    const imageItem = btn.closest(".img-edit-item");
-    if (imageItem) {
-        imageItem.remove();
-        return;
-    }
+// Biến đếm ảnh mới (giữ nguyên)
+let newImageIndex = <?= count($tour_detail->images) ?>; 
 
-    // Xóa item Chính sách (policy-item)
-    const policyItem = btn.closest(".policy-item");
-    if (policyItem) {
-        policyItem.remove();
-        return;
-    }
+/**
+ * Hàm xóa tổng quát và xử lý cập nhật số ngày lịch trình.
+ * @param {HTMLButtonElement} btn - Nút 'Xóa' được click.
+ */
+function removeItem(btn) {
+    const parentContainer = btn.closest(".d-flex, .img-edit-item, .policy-item");
+    if (!parentContainer) return;
 
-    // Xóa item Địa điểm hoặc Dịch vụ (là các div.d-flex)
-    const dynamicItem = btn.closest(".d-flex");
-    if(dynamicItem) dynamicItem.remove();
+    // 1. Thực hiện xóa phần tử
+    parentContainer.remove();
+
+    // 2. Nếu phần tử bị xóa thuộc Lịch trình, thực hiện cập nhật lại số ngày
+    const scheduleContainer = document.getElementById('schedule-item');
+    // Kiểm tra xem phần tử bị xóa có nằm trong container lịch trình hay không
+    if (scheduleContainer && scheduleContainer.contains(parentContainer)) {
+        updateScheduleDayNumbers();
+    }
+}
+
+/**
+ * Hàm cập nhật lại số thứ tự của các ngày trong Lịch trình.
+ */
+function updateScheduleDayNumbers() {
+    const container = document.getElementById('schedule-item');
+    if (container) {
+        // Chỉ chọn các div.d-flex là con trực tiếp, không phải div của các phần khác
+        container.querySelectorAll('div.d-flex').forEach((div, idx) => {
+            // Đảm bảo chỉ cập nhật lại số ngày nếu có tag span chứa số ngày
+            const daySpan = div.querySelector('span.fw-bold');
+            if (daySpan) {
+                daySpan.textContent = `Ngày ${idx + 1}:`;
+            }
+        });
+    }
 }
 
 
-// Thêm ảnh mới
-let newImageIndex = <?= count($tour_detail->images) ?>; // Bắt đầu index sau số ảnh hiện có
+// --- Thêm ảnh mới
 function add_image_field() {
     const container = document.getElementById("image-add-container");
     const div = document.createElement("div");
@@ -338,18 +358,19 @@ function add_image_field() {
     div.innerHTML = `
         <img src="https://via.placeholder.com/100?text=Mới" alt="Ảnh mới" class="img-fluid">
         <input type="file" name="new_images[${newImageIndex}]" class="form-control" required>
-        <button type="button" class="btn btn-danger btn-sm" onclick="removeImageItem(this)">Xóa ảnh</button>`;
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">Xóa ảnh</button>`;
     
     container.appendChild(div);
     newImageIndex++;
 }
 
+// Hàm này không còn cần thiết vì đã gộp vào removeItem, nhưng nếu muốn giữ để dễ đọc:
 function removeImageItem(btn) {
-    btn.closest(".img-edit-item").remove();
+    removeItem(btn); 
 }
 
 
-// Thêm Địa điểm
+// --- Thêm Địa điểm
 function add_address(){
     const container = document.getElementById("address-item");
     const div = document.createElement("div");
@@ -359,13 +380,13 @@ function add_address(){
     container.appendChild(div);
 }
 
-// Thêm Dịch vụ
+// --- Thêm Dịch vụ 
 function add_service(){
     const container = document.getElementById("service-item");
     const div = document.createElement("div");
     div.classList.add("d-flex", "align-items-start", "mb-2");
     
-    // Lấy nội dung select PHP (Cần phải render PHP ở đây, đây là cách làm trong môi trường PHP/HTML)
+    // Lấy nội dung select PHP 
     const selectOptions = `
         <select name="type_service[]" class="form-control">
             <?php foreach($list_tour_supplier as $list_ts): ?>
@@ -377,45 +398,33 @@ function add_service(){
     container.appendChild(div);
 }
 
-// Thêm Chính sách
+// --- Thêm Chính sách 
 function add_policy(){
     const container = document.getElementById("policys-item");
     const div = document.createElement("div");
     div.classList.add("policy-item", "mb-2");
     div.innerHTML = `<input type="text" name="title[]" class="form-control mb-1" placeholder="Tiêu đề...">
-                     <textarea name="content[]" class="form-control mb-1" rows="3" placeholder="Nội dung..."></textarea>  
+                     <textarea name="content[]" class="form-control mb-1" rows="3" placeholder="Nội dung..."></textarea> 
                      <button type="button" class="btn btn-danger" onclick="removeItem(this)">Xóa</button>`;
     container.appendChild(div);
 }
 
-
-//<!-- sử lý thêm ngày lịch trình -->
+// --- Thêm ngày lịch trình (Đã sửa để gọi hàm cập nhật) ---
 function add_schedule() {
-    let container = document.getElementById('schedule-item'); // chọn đúng container
-    let dayCount = container.querySelectorAll('div.d-flex').length + 1;
-
+    let container = document.getElementById('schedule-item');
+    let dayCount = container.querySelectorAll('div.d-flex').length + 1; // Số ngày mới
     let div = document.createElement('div');
-    div.classList.add('d-flex', 'mb-2', 'align-items-start');
+    div.classList.add('d-flex', 'mb-2', 'align-items-start', 'schedule-row');
     div.innerHTML = `
+        <input type="hidden" name="schedule_id[]" value="">
         <span class="me-2 fw-bold">Ngày ${dayCount}:</span>
-        <textarea name="content[]" class="form-control me-2" placeholder="Nội dung..."></textarea>
+        <textarea name="schedule_content[]" class="form-control me-2" placeholder="Nội dung..."></textarea>
         <button type="button" class="btn btn-danger" onclick="removeItem(this)">Xóa</button>
     `;
     container.appendChild(div);
 }
 
-function removeItem(btn) {
-    let item = btn.closest('div.d-flex');
-    if(item) item.remove();
-
-    // cập nhật lại số ngày
-    let container = document.getElementById('schedule-item');
-    container.querySelectorAll('div.d-flex').forEach((div, idx) => {
-        div.querySelector('span').textContent = `Ngày ${idx + 1}:`;
-    });
-}
-</script>
-
+ </script>
 
 
 </body>

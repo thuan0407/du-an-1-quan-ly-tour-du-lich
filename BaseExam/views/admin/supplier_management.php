@@ -89,7 +89,7 @@
                                     <button type="button"
                                             class="btn btn-outline-secondary btn-sm mt-2"
                                             id="btn-add-service">
-                                        + Thêm dịch vụ
+                                       
                                     </button>
 
                                     <?php if (!empty($errors['services'])): ?>

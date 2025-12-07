@@ -49,6 +49,7 @@ if(isset($_GET['msg'])){
                     <th>Khách hàng</th>
                     <th>SDT khách hàng</th>
                     <th>Thanh toán</th>
+                    <th>TT.HDV</th>
                     <th>Hành động</th>
                 </tr>
             </thead>
@@ -73,6 +74,15 @@ if(isset($_GET['msg'])){
                                     <p style="color:red;">Đã đặt cọc</p>
                                 <?php else:?>
                                     <p style="color:green;">Đã thanh toán</p>
+                                <?php endif;?>
+                            </td>
+                            <td>
+                                <?php if($tt->status ==1): ?>
+                                    <p style="color:blue;">Đang chờ HDV</p>
+                                <?php elseif($tt->status == 2):?>
+                                    <p style="color:green;">Đã có HDV</p>
+                                <?php else :?>
+                                    <p style="color:red;">Chưa có HDV</p>
                                 <?php endif;?>
                             </td>
                             <td>

@@ -28,8 +28,15 @@ class Schedule_details_Model extends BaseModel{
         return $stmt->execute(['tour_id' => $tour_id]);
     }
 
+    //xóa lịch trình theo id
+    public function delete_old_daily($id) {
+    $sql = "DELETE FROM schedule_details WHERE id = :id";
+    $stmt = $this->pdo->prepare($sql);
+    return $stmt->execute(['id' => $id]);
+}
 
-    public function find_by_tour($tour_id) {
+    //  lấy lịch triinfh theo id tour
+    public function find_by_tour($tour_id) {  
         $sql = "SELECT * FROM schedule_details WHERE id_tour = :tour_id ORDER BY id ASC";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['tour_id' => $tour_id]);
@@ -46,5 +53,15 @@ class Schedule_details_Model extends BaseModel{
             ]);
         }
 
+
+    // Cập nhật nội dung dòng theo ID
+    public function update($id, $data) {
+        $sql = "UPDATE {$this->table} SET content = :content WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            'content' => $data['content'],
+            'id'      => $id
+        ]);
+    }
 }
 ?>

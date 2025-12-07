@@ -85,11 +85,7 @@
       <a class="navbar-brand ms-2" href="?action=home_admin">Hệ thống quản lý</a>
 
       <!-- Search bar -->
-      <form class="d-flex ms-auto" role="search">
-       <input class="form-control me-2" type="search" placeholder="Tìm kiếm..." aria-label="Search">
-        <button class="btn btn-outline-light" type="submit"><i class="fa-solid fa-magnifying-glass"></i>Tìm</button>
-      </form>
-    </div>
+       <img src="" alt="">
   </nav>
 
   <!-- Sidebar -->

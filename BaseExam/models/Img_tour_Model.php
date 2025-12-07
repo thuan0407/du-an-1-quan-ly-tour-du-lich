@@ -33,7 +33,7 @@ class Img_tour_Model extends BaseModel{
     return $images;
     }
 
-    public function delete_img_tour($tour_id){
+    public function delete_img_tour($tour_id){     // xóa ảnh theo id tour
         $sql="DELETE FROM img_tour WHERE id_tour = :tour_id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['tour_id'=> $tour_id]);
@@ -52,6 +52,17 @@ class Img_tour_Model extends BaseModel{
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute(['tour_id'=> $tour_id]);
     return $stmt->fetchAll(PDO::FETCH_OBJ); // mỗi phần tử có ->id, ->img
+}
+    // **Cập nhật ảnh theo path cũ** (controller đang gọi)
+    public function update_image_path($oldPath, $newPath){
+        $stmt = $this->pdo->prepare("UPDATE img_tour SET img = ? WHERE img = ?");
+        return $stmt->execute([$newPath, $oldPath]);
+    }
+
+public function delete_image_path($path){
+    $sql = "DELETE FROM img_tour WHERE img = :path";
+    $stmt = $this->pdo->prepare($sql);
+    return $stmt->execute(['path' => $path]);
 }
 
 }

@@ -1,5 +1,12 @@
 <?php require_once __DIR__ . '/../../navbar.php'; ?>
-<?php require_once __DIR__ . '/../nav_booking.php'; ?>
+<?php require_once __DIR__ . '/../nav_booking.php';
+$success = "";
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] === 'success') {
+        $success = "Cập nhật HDV Thành công!";
+    }
+} 
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,59 +14,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <style>
-        .timeline {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-            margin: 40px 0;
-        }
-
-        .timeline::before {
-            content: "";
-            position: absolute;
-            top: 15px;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: #ddd;     /* màu đường */
-            z-index: 1;
-        }
-
-        .timeline-step {
-            text-align: center;
-            position: relative;
-            z-index: 2;
-        }
-
-        .timeline-step .circle {
-            width: 25px;
-            height: 25px;
-            background: #ccc;
-            border-radius: 50%;
-            margin: 0 auto;
-            transition: 0.3s;
-        }
-
-        .timeline-step.active .circle {
-            background: #28a745; /* màu xanh sáng */
-        }
-
-        .timeline-step .label {
-            margin-top: 8px;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .timeline-step.active .label {
-            font-weight: bold;
-            color: #28a745;
-        }
-    </style>
 </head>
 <body>
-    <div class="content-wrapper ">
+        <div class="content-wrapper ">
+        <!-- Thông báo -->
+        <?php if(!empty($success)):?>
+            <div class="alert alert-success"><?=htmlspecialchars($success)?></div>
+            <?php endif;?>
+
         <h2>Chi tiết hoạt động tour <?=$tour->name?></h2>
             <div style="width:90%; margin-left:50px;">
                 <div class="timeline">
@@ -84,11 +46,27 @@
 
                     <h4>Hướng dẫn viên</h4>
                     <label for="">Hướng dẫn viên: <?=$tour_guide->name?></label><br>
-                    <label for="">SDT HDV: 0<?=$tour_guide->phone_number?></label><br>
+                    <label for="">SDT HDV: 0<?=$tour_guide->phone_number?></label><br><br>
+
+                    <div>
+                        <label for="">Chọn HDV khác</label>
+                        <div class="d-flex">
+                        <select name="id_tour_guide" id="" class="form-control" style="width:350px;">
+                            <?php foreach($list_guide as $li) :?>
+                                <option value="<?=$li->id?>"><?=$li->name?></option>
+                            <?php endforeach ;?>
+                        </select>
+                        <button class="btn btn-primary" type="submit" name="update_tour_guide">Cập nhật</button>
+                        </div>
+                    </div>
+                    
+                    <br>
                 </div>
 
                 <div class="col">
-                    <h4>Khách hàng</h4>
+                    <h4>Khách hàng</h4> <label for="">
+                        <a href="?action=comtomer_list&id=<?=$book_tour->id?>">>>>Danh sách hàng</a>
+                    
                     <label for="">Khách hàng: <?=$book_tour->customername?></label><br>
                     <label for="">SDT khách hàng: 0<?=$book_tour->phone?></label> <br> <br>
 
@@ -122,7 +100,6 @@
                     <h4>Chi tiết lịch trình</h4>
                     <table class="table table-hover">
                         <tr>
-                            <th>STT</th>
                             <th>Ngày</th>
                             <th>Nội dung</th>
                         </tr>
@@ -130,14 +107,15 @@
                         foreach($list_departure_schedule_details as $ds){$i++; ?>
                         <tr>
                             <td><?=$i?></td>
-                            <td><?=$ds->date?></td>
                             <td><?=$ds->content?></td>
                         </tr>
                             <?php
                         }
                         ?>
                     </table>
-                </div>
+                </div><br>
+
+
               <?php
               if($departure_schedule->status == 1):?>
                     <button class="btn btn-danger form-control" type="submit" name="cancel" onclick="return confirm('Bạn có chắc là muốn xóa chuyến tour này không?')">Hủy tour</button>
@@ -153,3 +131,189 @@
     
 </body>
 </html> 
+    <style>
+    /* --- CSS CƠ SỞ VÀ KHUNG CHUNG --- */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f7f9fc; /* Nền sáng */
+        color: #333;
+    }
+
+    /* Container chính chứa nội dung tour */
+    .content-wrapper {
+        padding: 20px 0;
+        margin: 0 auto;
+        background-color: #ffffff; /* Nền trắng cho toàn bộ nội dung chính */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border-radius: 8px;
+    }
+
+    /* Tiêu đề tour */
+    h2 {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+        font-size: 1.8rem;
+        padding-left: 50px; 
+        padding-right: 50px;
+    }
+
+    h3, h4 {
+        color: #343a40;
+        margin-top: 20px;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+    
+    label {
+        font-weight: 500;
+        color: #555;
+        display: block; 
+        margin-bottom: 5px;
+    }
+
+    /* --- PHẦN INPUT VÀ CĂN CHỈNH FORM --- */
+    .form-control, select {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 8px 12px;
+        transition: border-color 0.3s;
+    }
+
+    .d-flex {
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    /* Điều chỉnh input Đã cọc */
+    .d-flex input[name="amount_money_pay"] {
+        width: 200px !important; 
+    }
+    .d-flex label {
+        flex-shrink: 0;
+    }
+    
+    /* Căn chỉnh khối chọn HDV mới */
+    .col > div {
+        margin-top: 15px;
+    }
+    .col > div select {
+        width: 350px;
+    }
+
+    /* --- KHỐI THÔNG TIN CHIA CỘT (Giá/HDV và Khách hàng/Yêu cầu) --- */
+    .row {
+        padding: 0 50px; /* Căn chỉnh với Timeline */
+    }
+    .row > .col {
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        background-color: #f8f9fa; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .row > .col:first-child {
+        margin-right: 20px;
+    }
+
+
+    /* --- PHẦN ĐỊA ĐIỂM & LỊCH TRÌNH --- */
+    .content-wrapper > form > div:last-child {
+        padding: 20px 50px;
+        margin-top: 20px;
+    }
+
+    /* --- BẢNG (TABLE) --- */
+    .table {
+        margin-top: 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden; 
+    }
+    .table th {
+        background-color: #e9ecef;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    /* --- NÚT HÀNH ĐỘNG HỦY/KHÔNG HỦY --- */
+    .form-control.btn {
+        margin-top: 30px;
+        font-weight: 600;
+        padding: 12px;
+        border-radius: 8px;
+        width: 100%;
+    }
+    
+    /* --- TIMELINE (Giữ nguyên cấu trúc nhưng loại bỏ hiệu ứng hover/active) --- */
+    .timeline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        margin: 40px 0;
+    }
+
+    .timeline::before {
+        content: "";
+        position: absolute;
+        top: 15px;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #ddd; 
+        z-index: 1;
+    }
+
+    .timeline-step {
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .timeline-step .circle {
+        width: 25px;
+        height: 25px;
+        background: #ccc; /* Màu mặc định cho tất cả các bước */
+        border-radius: 50%;
+        margin: 0 auto;
+        transition: 0.3s;
+    }
+
+    .timeline-step.active .circle {
+        background: #28a745; /* Vẫn giữ lại nếu bạn muốn dùng logic PHP cũ */
+    }
+
+    .timeline-step .label {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .timeline-step.active .label {
+        font-weight: bold;
+        color: #28a745;
+    }
+    /* --- HẾT TIMELINE --- */
+
+    /* Responsive cơ bản */
+    @media (max-width: 992px) {
+        .row {
+            padding: 0 20px;
+        }
+        .row > .col {
+            margin-right: 0;
+            margin-bottom: 20px;
+        }
+        .content-wrapper > form > div:last-child {
+            padding: 20px;
+        }
+        .d-flex input[name="amount_money_pay"] {
+            width: 100% !important; 
+        }
+        .col > div select {
+            width: 100% !important;
+        }
+    }
+</style>

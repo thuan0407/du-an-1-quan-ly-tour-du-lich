@@ -268,47 +268,87 @@ public function tour_detail($id)
         $this->tourModel->update_tour($tour_detail);
 
         // Xử lý ảnh tour mới (xóa cũ nếu có upload)
-        if (!empty($_FILES['new_images']['name'])) {
-            foreach ($images as $imgPath) {
-                $filePath = __DIR__ . '/../' . $imgPath;
-                if (file_exists($filePath)) unlink($filePath);
-            }
-            $this->imgtourModel->delete_img_tour($id);
+        if (!empty($_POST['old_images'])) {
+            $oldImages = $_POST['old_images']; // Danh sách ảnh còn tồn tại trên form
+            $dbImages  = $tour_detail->images; // Danh sách ảnh hiện có trong DB
 
-            foreach ($_FILES['new_images']['name'] as $key => $name) {
-                if ($_FILES['new_images']['error'][$key] === 0) {
-                    $tmp = $_FILES['new_images']['tmp_name'][$key];
+            // === 1. XÓA NHỮNG ẢNH KHÔNG CÒN TRONG old_images (user bấm Xóa ảnh) ===
+            foreach ($dbImages as $imgPath) {
+                if (!in_array($imgPath, $oldImages)) {
+                    // Xóa file
+                    $file = __DIR__ . '/../' . $imgPath;
+                    if (file_exists($file)) unlink($file);
+                    // Xóa record trong DB
+                    $this->imgtourModel->delete_image_path($imgPath);
+                }
+            }
+
+            // === 2. XỬ LÝ ẢNH ĐƯỢC THAY THẾ ===
+            foreach ($oldImages as $index => $oldImgPath) {
+
+                // Nếu có file upload mới tại vị trí này
+                if (!empty($_FILES['new_images']['name'][$index])) {
+
+                    // Xóa file cũ
+                    $file = __DIR__ . '/../' . $oldImgPath;
+                    if (file_exists($file)) unlink($file);
+
+                    // Upload file mới
+                    $tmp  = $_FILES['new_images']['tmp_name'][$index];
+                    $name = $_FILES['new_images']['name'][$index];
                     $unique = time() . "_" . $name;
-                    $path = "uploads/tour/$unique";
-                    move_uploaded_file($tmp, $path);
-                    $this->imgtourModel->insert(['tour_id' => $id, 'image_path' => $path]);
+
+                    $newPath = "uploads/tour/" . $unique;
+                    move_uploaded_file($tmp, $newPath);
+
+                    // Update DB
+                    $this->imgtourModel->update_image_path($oldImgPath, $newPath);
                 }
             }
         }
 
-// Cập nhật địa điểm
-if (isset($_POST['address'])) {
-    
-    // 1. Lọc ra các địa điểm hợp lệ (không rỗng hoặc chỉ chứa khoảng trắng)
-    $validAddresses = array_filter($_POST['address'], function($addr) {
-        return trim($addr) !== "";
-    });
+        // === 3. XỬ LÝ ẢNH MỚI THÊM ===
+        if (!empty($_FILES['new_images']['name'])) {
 
-    // 2. Nếu có bất kỳ địa điểm hợp lệ nào hoặc người dùng xóa hết (mảng tồn tại nhưng rỗng)
-    // Thực hiện xóa toàn bộ danh sách cũ trong DB.
-    $this->addressModel->delete_address($id);
-    
-    // 3. Thêm mới các địa điểm hợp lệ
-    if (!empty($validAddresses)) {
-        foreach ($validAddresses as $addr) {
-            $this->addressModel->insert([
-                'id_tour' => $id,
-                'name'    => trim($addr), // Lưu giá trị đã được làm sạch khoảng trắng
-                'status'  => 1
-            ]);
+            foreach ($_FILES['new_images']['name'] as $index => $name) {
+                // Chỉ xử lý ảnh mới thêm (không có old_images tương ứng)
+                if (!isset($_POST['old_images'][$index]) && $_FILES['new_images']['error'][$index] === 0) {
+                    $tmp = $_FILES['new_images']['tmp_name'][$index];
+                    $unique = time() . "_" . $name;
+                    $path = "uploads/tour/" . $unique;
+                    move_uploaded_file($tmp, $path);
+                    $this->imgtourModel->insert([
+                        'tour_id' => $id,
+                        'image_path' => $path
+                    ]);
+                }
+            }
         }
-    }
-}
+
+
+        // Cập nhật địa điểm
+        if (isset($_POST['address'])) {
+            
+            // 1. Lọc ra các địa điểm hợp lệ (không rỗng hoặc chỉ chứa khoảng trắng)
+            $validAddresses = array_filter($_POST['address'], function($addr) {
+                return trim($addr) !== "";
+            });
+
+            // 2. Nếu có bất kỳ địa điểm hợp lệ nào hoặc người dùng xóa hết (mảng tồn tại nhưng rỗng)
+            // Thực hiện xóa toàn bộ danh sách cũ trong DB.
+            $this->addressModel->delete_address($id);
+            
+            // 3. Thêm mới các địa điểm hợp lệ
+            if (!empty($validAddresses)) {
+                foreach ($validAddresses as $addr) {
+                    $this->addressModel->insert([
+                        'id_tour' => $id,
+                        'name'    => trim($addr), // Lưu giá trị đã được làm sạch khoảng trắng
+                        'status'  => 1
+                    ]);
+                }
+            }
+        }
 
         // Cập nhật dịch vụ tour
         $currentServices = array_map(fn($s) => $s['id'], $tour_supplier);
@@ -327,6 +367,7 @@ if (isset($_POST['address'])) {
             }
         }
 
+        
         // Xóa tất cả chính sách cũ trước khi thêm mới
         $this->policyModel->delete_policy($id);
 
@@ -336,16 +377,6 @@ if (isset($_POST['address'])) {
                 $title = trim($title);
                 $content = trim($_POST['content'][$key] ?? '');
                 if ($title !== '' && $content !== '') {
-                    // Xử lý upload file nếu có
-                    if (!empty($_FILES['policy_file']['name'][$key]) && $_FILES['policy_file']['error'][$key] === 0) {
-                        $tmp = $_FILES['policy_file']['tmp_name'][$key];
-                        $unique = time() . "_" . basename($_FILES['policy_file']['name'][$key]);
-                        $uploadDir = __DIR__ . '/../uploads/policy/';
-                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-                        $path = $uploadDir . $unique;
-                        if (move_uploaded_file($tmp, $path)) $content = "uploads/policy/" . $unique;
-                    }
-
                     $this->policyModel->insert([
                         'id_tour' => $id,
                         'title'   => $title,
@@ -355,21 +386,34 @@ if (isset($_POST['address'])) {
             }
         }
 
-// Xóa lịch trình cũ trước khi cập nhật
-$this->scheduledetailsModel->delete_daily($id);
-
-// Kiểm tra xem form có lịch trình mới không
-if (!empty($_POST['daily_content'])) {
-    foreach ($_POST['daily_content'] as $dayContent) {
-        $dayContent = trim($dayContent);
-        if ($dayContent !== "") {
-            $this->scheduledetailsModel->addDailyPlan([
-                'id_tour' => $id,
-                'content' => $dayContent
-            ]);
+        // lịch trình
+        $old_schodeledet_tails = $this->scheduledetailsModel->find_by_tour($id);  //lấy lịch trình cũ trong database
+        if (!$old_schodeledet_tails) {                            // Nếu chưa có dữ liệu, trả về mảng rỗng
+            $old_schodeledet_tails = [];
         }
-    }
-}
+        $oldIds = array_column($old_schodeledet_tails, 'id');  // lấy id của lịch trình cũ
+        $newIds = $_POST['schedule_id'] ?? [];                 // chỉ những ID còn tồn tại trong form
+        $deletedIds = array_diff($oldIds, $newIds);            //tìm những id đã bị xóa
+        foreach ($deletedIds as $delId) {                       // xóa theo id đã không còn tồn tại ở form
+            $this->scheduledetailsModel->delete_old_daily($delId);
+        }
+
+        // 2. Xử lý update/insert
+        foreach ($_POST['schedule_content'] as $key => $content) {
+            $id_s = $_POST['schedule_id'][$key] ?? null;
+            $content = trim($content);
+            if ($content === '') continue;
+
+            if ($id_s) {
+                $this->scheduledetailsModel->update($id_s, ['content' => $content]);
+            } else {
+                $this->scheduledetailsModel->insert([
+                    'id_tour' => $id,
+                    'content' => $content
+                ]);
+            }
+        }
+
 
 
         echo "<script>alert('Cập nhật tour thành công!'); window.location.href='?action=tour_manager_content';</script>";
