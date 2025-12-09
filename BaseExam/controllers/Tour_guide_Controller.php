@@ -206,6 +206,45 @@ class Tour_guide_Controller extends Base_Controller{
         require './views/tour_guide/home_guide.php';
     }
 
+    public function pending_detail()
+        {
+             $guide_id = $_SESSION['guide_id'] ?? null;
+            if (!$guide_id) {
+                header("Location: ?action=login_guide");
+                exit;
+            }
+
+            $id = $_GET['id'] ?? null;
+            if (!$id) {
+                echo "Thiếu ID!";
+                return;
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        // Nếu bấm nút Xác nhận
+        if (isset($_POST['confirm'])) {
+            // status = 2 → hướng dẫn viên nhận tour
+            $this->booktourModel->updateBookTourStatus($id, 2);
+
+            header("Location: ?action=guide_pending_tour&msg=confirmed");
+            exit;
+        }
+
+        // Nếu bấm nút Hủy
+        if (isset($_POST['cancel'])) {
+            // status = 5 → hướng dẫn viên từ chối tour
+            $this->booktourModel->updateBookTourStatus($id, 5);
+
+            header("Location: ?action=guide_pending_tour&msg=canceled");
+            exit;
+        }
+    }
+            // Lấy chi tiết từ model
+            $detail = $this->booktourModel->getBookTourDetail($id);
+            // Gọi view
+            $viewFile = "./views/tour_guide/pending_detail.php";
+            require "./views/tour_guide/home_guide.php";
+        }
 
     public function update_schedule_status() {
         $guide_id = $_SESSION['guide_id'] ?? null;
@@ -603,6 +642,17 @@ public function roll_call_form() {
     $viewFile = "./views/tour_guide/rollcall.php";
     require "./views/tour_guide/home_guide.php";
 }
+public function updateStatusTour() {
+        if (!isset($_GET['id'])) {
+            echo "Thiếu ID!";
+            return;
+        }
+
+        $id = intval($_GET['id']);
+        $this->booktourModel->updateStatus($id);
+        header("Location: ?action=schedule_guide");
+        exit;
+    }
 }
 
 ?> 

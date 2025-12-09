@@ -19,17 +19,50 @@ if (isset($_GET['msg'])) {
 </head>
 <body>
     <div class="content-wrapper ">
-          <!-- Thông báo -->
-        <?php if(!empty($success)):?>
-            <div class="alert alert-success"><?=htmlspecialchars($success)?></div>
-            <?php endif;?>
+                <!-- Thông báo -->
+    <?php if(!empty($success)):?>
+        <div class="alert alert-success"><?=htmlspecialchars($success)?></div>
+        <?php endif;?>
 
-   
-    <h2 class="mb-4">Danh sách khách hàng</h2>
+    <div class="d-flex">
+        <h2 style="margin-right:200px;" class="mb-4">Danh sách khách hàng</h2>
+        <h2 id="money_display" class="text-danger"></h2> <!-- hiển thị số tiền -->
+        <input type="hidden" id="money"  value=""  name="total_money"> <!-- gửi form -->
 
-     <h3>Số chỗ tối đa: <?=$book_tour->quantity?></h3>
-
+    </div>
     <form id="customerForm" method="post" action="">
+        
+        <!-- Khai báo giá ẩn -->
+        <input type="hidden" id="price" value="<?=$tour->price?>">
+
+
+        <div style=" font-size: 25px;"> 
+            <div class="d-flex align-items-center" style="justify-content: space-between; width: 100%;">
+                <div>Số chỗ tối thiểu: <?=$book_tour->tour_minimum_scope?></div>
+                <div>Số chỗ tối đa: <?=$book_tour->tour_scope?></div>
+                <div>Số chỗ hiện tại: <?=$book_tour->quantity?></div>
+
+                <div class="d-flex align-items-center" style="justify-content: space-between; width: 100%;">       
+                <div class="d-flex">
+                    <label for="">Số chỗ: </label>
+                    <input type="number" oninput="money()" name="quantity" id="scope" value="<?=$book_tour->quantity?>" class="form-control" >
+                </div>
+                <div class="d-flex">
+                    <label for="">Số tiền cọc:</label>
+                    <input type="number" name="amount_money" value="<?=$pay->amount_money?>" class="form-control text-danger">   <!-- Số tiền đặt cọc -->
+                </div>
+
+                <div class="d-flex">
+                    <label for="">Hình thức</label>
+                    <select name="payment_method" id="" class="form-control">
+                        <option value="1">Chuyển khoản</option>
+                        <option value="2">Tiền mặt</option>
+                    </select>
+                </div>
+                </div>
+        </div><br><hr>
+
+        
         <?php $index = 1; foreach($customer_list as $cu_l): ?>
         <div class="row align-items-center mb-2 customer-row">
 
@@ -69,6 +102,22 @@ if (isset($_GET['msg'])) {
 </div>
 
 <script>
+    //hàm tính tiền
+    window.onload = function(){
+        money();
+    }
+    
+    function money(){
+        let price = document.getElementById("price").value;
+        let scope = document.getElementById("scope").value;
+        let total = price * scope;
+        // hiển thị ra màn hình
+        document.getElementById("money_display").innerHTML = total.toLocaleString() + ' VND';
+
+        // lưu giá trị vào input ẩn để gửi form
+        document.getElementById("money").value = total;
+    }
+
 function removeCustomer(btn) {
     if(confirm('Bạn có chắc muốn xóa khách này không?')) {
         const row = btn.closest('.customer-row');

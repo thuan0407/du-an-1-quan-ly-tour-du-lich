@@ -191,12 +191,16 @@
 
                 <div class="input-group-2x">
                     <div class="mb-3">
-                        <label for="">Giá</label>
-                        <input type="number" name="price" value="<?=$tour_detail->price?>" class="form-control">
-                    </div>
-                    <div class="mb-3">
                         <label for="">Số chỗ</label>
                         <input type="number" name="scope" value="<?=$tour_detail->scope?>" class="form-control">
+                    </div>
+                     <div class="mb-3">
+                        <label for="">Số chỗ tối thiểu</label>
+                        <input type="number" name="minimum_scope" value="<?=$tour_detail->minimum_scope?>" class="form-control">
+                    </div>
+                     <div class="mb-3">
+                        <label for="">Giá</label>
+                        <input type="number" name="price" value="<?=$tour_detail->price?>" class="form-control">
                     </div>
                 </div>
 
@@ -255,7 +259,7 @@
                             <div class="d-flex align-items-start mb-2">
                                 <select name="type_service[]" class="form-control">
                                     <?php foreach($list_tour_supplier as $list_ts): ?>
-                                        <option value="<?= $list_ts->id ?>" <?= $list_ts->id == $sup['id'] ? 'selected' : '' ?>><?= $list_ts->type_service ?></option>
+                                        <option value="<?= $list_ts->id ?>" <?= $list_ts->id == $sup['id'] ? 'selected' : '' ?>><?= $list_ts->type_service ?> (Nhà cung cấp <?=$list_ts->name_supplier?>)</option>
                                     <?php endforeach; ?>
                                 </select>
                                 <button type="button" class="btn btn-danger ms-2" onclick="removeItem(this)">Xóa</button>

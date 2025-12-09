@@ -3,42 +3,49 @@
 <?php else: ?>
     <table border="1" cellpadding="10">
         <tr>
-            <th>ID</th>
+            <th>STT</th>
             <th>Tên tour</th>
             <th>Tên khách đặt</th>
             <th>SĐT</th>
             <th>Ngày đặt</th>
             <th>Ngày/Đêm</th>
             <th>Ghi chú (ngày đi)</th>
-            <th>Trạng thái</th>
+            <th>Chi tiết</th>
         </tr>
 
-        <?php foreach ($pendingTours as $b): ?>
+        <?php 
+        $index=1;
+        foreach ($pendingTours as $b): ?>
         <tr>
-            <td><?= $b['id'] ?></td>
+            <td><?= $index++?></td>
             <td><?= htmlspecialchars($b['tour_name']) ?></td>
             <td><?= htmlspecialchars($b['customername']) ?></td>
             <td><?= htmlspecialchars($b['phone']) ?></td>
             <td><?= htmlspecialchars($b['date']) ?></td>
             <td><?= $b['days'] ?> ngày - <?= $b['nights'] ?> đêm</td>
             <td><?= htmlspecialchars($b['note']) ?></td>
-            <td><?= statusLabel($b['status']) ?></td>
+            <td><a class="icon-view" href="?action=pending_detail&id=<?= $b['id'] ?>">👁 Xem</a></td>
         </tr>
         <?php endforeach; ?>
 
     </table>
 <?php endif; ?>
-<?php 
-function statusLabel($status) {
-    $labels = [
-        1 => "<span style='color: orange; font-weight: bold;'>Chờ duyệt</span>",
-        2 => "<span style='color: green; font-weight: bold;'>Đã duyệt</span>",
-        3 => "<span style='color: gray; font-weight: bold;'>Đã kết thúc</span>"
-    ];
-    return $labels[$status] ?? "Không xác định";
-}
-?>
+
 <style>
+    .icon-view {
+    padding: 5px 12px;
+    background: #6610f2;
+    color: white !important;
+    border-radius: 6px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.icon-view:hover {
+    background: #520dc2;
+    transform: scale(1.05);
+}
 table {
     width: 100%;
     border-collapse: collapse;

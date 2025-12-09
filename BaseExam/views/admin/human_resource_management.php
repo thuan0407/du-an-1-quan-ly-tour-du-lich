@@ -143,7 +143,7 @@ if (isset($_GET['msg'])) {
                         </div>
                     </div>
         </div>
-        <table class="table">
+        <table class="table table-hover">
             <thead class="table table primary">
                 <tr>
                     <th>STT</th>
@@ -170,7 +170,13 @@ if (isset($_GET['msg'])) {
                         <td><?=$i?></td>
                         <td><?=$tt->name?></td>
                         <td><?=$tt->email?></td>
-                        <td><?=$tt->type_guide?></td>
+                        <td>
+                            <?php if($tt->type_guide == 1): ?>
+                                <p>Nội địa</p>   
+                            <?php else: ?>
+                                <p>Ngoại địa</p> 
+                            <?php endif;?>
+                       </td>
                         <td><?=$tt->years_experience?></td>
                         <td>
                             <img src="<?= BASE_ASSETS_UPLOADS . $tt->img ?>" alt="Ảnh đại diện" width="100" class="rounded-circle" height="100px;">

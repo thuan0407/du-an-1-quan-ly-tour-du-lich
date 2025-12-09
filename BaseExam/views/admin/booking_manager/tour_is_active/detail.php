@@ -45,20 +45,28 @@ if (isset($_GET['msg'])) {
                     <label for="">Khu vực: <?=$tour->type_tour ==1 ?"Nội địa":"Ngoại địa"?></label><br><br>
 
                     <h4>Hướng dẫn viên</h4>
-                    <label for="">Hướng dẫn viên: <?=$tour_guide->name?></label><br>
-                    <label for="">SDT HDV: 0<?=$tour_guide->phone_number?></label><br><br>
+                    <?php if(!empty($tour_guide)) :?>
+                        <label for="">Hướng dẫn viên: <?=$tour_guide->name?></label><br>
+                        <label for="">SDT HDV: 0<?=$tour_guide->phone_number?></label><br><br>
+                    <?php endif;?>
+           
+                     <!-- Nếu số chỗ nhỏ hơn số chỗ tối thiểu thì sẽ khôgn đc chọn hướng dẫn viên -->
 
-                    <div>
-                        <label for="">Chọn HDV khác</label>
-                        <div class="d-flex">
+                    <?php if($book_tour->quantity >= $tour->minimum_scope): ?> 
+                        <p class="text-success">Số lượng khách đã đủ, có thể cập nhật HDV</p>
+
+                    <label for="">Cập nhật HDV cho tour</label>
+                    <div class="d-flex">
                         <select name="id_tour_guide" id="" class="form-control" style="width:350px;">
                             <?php foreach($list_guide as $li) :?>
-                                <option value="<?=$li->id?>"><?=$li->name?></option>
+                                <option value="<?= $li->id ?>"><?= htmlspecialchars($li->name) ?></option>
                             <?php endforeach ;?>
                         </select>
                         <button class="btn btn-primary" type="submit" name="update_tour_guide">Cập nhật</button>
-                        </div>
-                    </div>
+                    </div>                              
+                    <?php else: ?>
+                        <p class="text-danger">Chưa thể cập nhật hướng dẫn viên vì số lượng khách chưa đủ</p>
+                    <?php endif; ?>
                     
                     <br>
                 </div>
@@ -95,8 +103,18 @@ if (isset($_GET['msg'])) {
               </div><br>
                <div style="padding:0 50px;">
                     <h4>Địa điểm</h4>
-                    <label for="">Điểm bắt đầu: <?=$departure_schedule->start_location?></label><br>
-                    <label for="">Điểm kết thúc: <?=$departure_schedule->end_location?></label><br><br>
+                    <div class="d-flex justify-content-between" style="gap: 20px; margin:0 200px;">
+                        <div>
+                            <label>Điểm bắt đầu: <?=$departure_schedule->start_location?></label><br>
+                            <label>Điểm kết thúc: <?=$departure_schedule->end_location?></label>
+                        </div>
+                        <div>
+                            <label>Ngày khởi hành: <?=$departure_schedule->start_date?></label><br>
+                            <label>Ngày kết thúc: <?=$departure_schedule->end_date?></label>
+                        </div>
+                    </div>
+
+
                     <h4>Chi tiết lịch trình</h4>
                     <table class="table table-hover">
                         <tr>

@@ -105,7 +105,7 @@ new Chart(document.getElementById("revenueChart"), {
     scales: {
       y: {
         beginAtZero: true,
-        max: 2000000000,
+        max: 500000000,
         ticks:{
           callback:(v)=>v.toLocaleString('vi-VN')+"₫"
         }

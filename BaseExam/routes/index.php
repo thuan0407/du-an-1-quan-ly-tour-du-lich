@@ -30,6 +30,9 @@ match ($action) {
     'guide_booktour_detail' => (new Tour_guide_Controller)->guide_booktour_detail(),
     'guide_booktour'        => (new Tour_guide_Controller)->guide_booktour(),
     'guide_pending_tour'  => (new Tour_guide_Controller)->pending_tour(),
+    'updateStatusTour'  => (new Tour_guide_Controller)->updateStatusTour(),
+
+    'pending_detail'  => (new Tour_guide_Controller)->pending_detail(),
 
     'rollcall'  => (new Tour_guide_Controller)->rollcall(),
     'roll_call_form'  => (new Tour_guide_Controller)->roll_call_form(),
@@ -73,7 +76,9 @@ match ($action) {
     'comtomer_list'                      => (new Booking_controller)->comtomer_list($id),                      // danh sách hàng
    
     'tour_has_ended'                     => (new Booking_controller)->tour_has_ended(),                        //quản lý tour đã kết thú
+    'hidden'                             => (new Booking_controller)->hidden($id),                             // ẩn tour đã hủy
     'tour_canceled'                      => (new Booking_controller)->tour_canceled(), 
+    'detail_tour_has_endes'              => (new Booking_controller)->detail_tour_has_endes($id), 
     
 
     'supplier_management'                => (new Admin_Controller)->supplier_management(),                    //quản lý nhà cung cấp

@@ -220,11 +220,15 @@
                     </div>
                     <div class="mb-3">
                         <label>Số đêm:</label>
-                        <input type="number" name="number_of_nights" class="form-control" required min="0">
+                        <input type="number" name="number_of_nights" class="form-control" required min="1">
                     </div>
                     <div class="mb-3">
                         <label>Số chỗ:</label>
                         <input type="number" name="scope" class="form-control" required min="1">
+                    </div>
+                    <div class="mb-3">
+                        <label>Số chỗ tối thiểu:</label>
+                        <input type="number" name="minimum_scope" class="form-control" required min="1">
                     </div>
                     <div class="mb-3">
                         <label>Giá:</label>
@@ -260,7 +264,7 @@
                         <div class="supplier-item d-flex mb-2">
                             <select name="name_supplier[]" class="form-control" required>
                                 <?php foreach($list_toursupplier as $sup): ?>
-                                    <option value="<?=$sup->type_service?>"><?=$sup->type_service?></option>
+                                    <option value="<?=$sup->type_service?>"><?=$sup->type_service?> ( Nhà cung cấp <?=$sup->name_supplier?>)</option>
                                 <?php endforeach; ?>
                             </select>
                             </div>

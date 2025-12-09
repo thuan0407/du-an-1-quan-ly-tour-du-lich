@@ -4,6 +4,7 @@
     public $type_service;
     public $id_supplier ;
     public $id_tour;
+    public $name_supplier;
  }
 
 
@@ -12,8 +13,9 @@ class Tour_supplier_Model extends BaseModel{
 
    public function all(){               //hiện toàn bộ thông tin nếu loại tour trùng thì chỉ hiện môt lần 
             try{
-                $sql="SELECT t.*
+                $sql="SELECT t.*, sup.name as name_supplier
                 FROM tour_supplier t
+                JOIN supplier sup ON sup.id = t.id_supplier
                 JOIN (
                     SELECT type_service, MAX(id) AS max_id
                     FROM tour_supplier
@@ -28,6 +30,7 @@ class Tour_supplier_Model extends BaseModel{
                     $tour_tupplier->type_service   =$tt['type_service'];
                     $tour_tupplier->id_suppl       =$tt['id_supplier'];
                     $tour_tupplier->id_tour        =$tt['id_tour'];
+                    $tour_tupplier->name_supplier  =$tt['name_supplier'];
                     $list[]=$tour_tupplier;
                 }
                 return $list;

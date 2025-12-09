@@ -85,43 +85,84 @@ public function getRevenueByMonth($year = null) {                 // doanh thu t
         }
     }
 
-    public function get_pay($id_book_tour){
-        try{
-            $sql = "SELECT * FROM pay WHERE id_book_tour = :id_book_tour";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt ->execute([':id_book_tour'=>$id_book_tour]);
 
-            $data =$stmt->fetch(PDO::FETCH_ASSOC);
-            if($data !== false);
-            $pay = new Pay();
-            $pay->id             = $data['id'];
-            $pay->date           = $data['date'];
-            $pay->payment_method = $data['payment_method'];
-            $pay->status         = $data['status'];
-            $pay->amount_money   = $data['amount_money'];
-            $pay->note           = $data['note'];
-            $pay->id_book_tour   = $data['id_book_tour'];
-            return $pay;
-        }catch(PDOException $err){
-        echo "lỗi get_play: " .$err->getMessage();
-        return null;
-    }
-    }
-
-    public function amount_money_pay($id, $amount_money){
-        try{
-            $sql ="UPDATE pay SET amount_money = :amount_money WHERE id = :id";
+        public function get_latest_pay($id_book_tour){   // lấy bản ghi mới nhất
+        try {
+            $sql = "SELECT * FROM pay 
+                    WHERE id_book_tour = :id_book_tour
+                    ORDER BY id DESC 
+                    LIMIT 1"; // lấy bản ghi mới nhất theo id
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([
-                ':id'            => $id,
-                ':amount_money'  => $amount_money
-            ]);
-            return $stmt->rowCount();
-        }catch(PDOException $err){
-            echo "Lỗi không thể update giá của bảng pay: " .$err->getMessage();
+            $stmt->execute([':id_book_tour' => $id_book_tour]);
+
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            if($data !== false){
+                $pay = new Pay();
+                $pay->id             = $data['id'];
+                $pay->date           = $data['date'];
+                $pay->payment_method = $data['payment_method'];
+                $pay->status         = $data['status'];
+                $pay->amount_money   = $data['amount_money'];
+                $pay->note           = $data['note'];
+                $pay->id_book_tour   = $data['id_book_tour'];
+                return $pay;
+            }
+            return null;
+        } catch(PDOException $err){
+            echo "Lỗi get_latest_pay: " . $err->getMessage();
             return null;
         }
     }
+
+    public function get_all_pay($id_book_tour){ // lấy toàn bộ thanh toán theo booking
+        try {
+            $sql = "SELECT * FROM pay 
+                    WHERE id_book_tour = :id_book_tour
+                    ORDER BY id DESC";  
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':id_book_tour' => $id_book_tour]);
+
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $pays = [];
+            foreach ($result as $data) {
+                $pay = new Pay();
+                $pay->id             = $data['id'];
+                $pay->date           = $data['date'];
+                $pay->payment_method = $data['payment_method'];
+                $pay->status         = $data['status'];
+                $pay->amount_money   = $data['amount_money'];
+                $pay->note           = $data['note'];
+                $pay->id_book_tour   = $data['id_book_tour'];
+
+                $pays[] = $pay;
+            }
+
+            return $pays;
+
+        } catch (PDOException $err) {
+            echo "Lỗi get_all_pay: " . $err->getMessage();
+            return [];
+        }
+    }
+
+
+
+    // public function amount_money_pay($id, $amount_money){        //cập nhật giá tiền đã thanh toán
+    //     try{
+    //         $sql ="UPDATE pay SET amount_money = :amount_money WHERE id = :id";
+    //         $stmt = $this->pdo->prepare($sql);
+    //         $stmt->execute([
+    //             ':id'            => $id,
+    //             ':amount_money'  => $amount_money
+    //         ]);
+    //         return $stmt->rowCount();
+    //     }catch(PDOException $err){
+    //         echo "Lỗi không thể update giá của bảng pay: " .$err->getMessage();
+    //         return null;
+    //     }
+    // }
 
 
     ///====================code của tùng =================

@@ -123,9 +123,9 @@
             <a href="?action=schedule_guide">Xem lịch làm việc</a>
         </li>
 
-        <li class="<?= ($action=='guide_Alltour') ? 'active' : '' ?>">
+        <!-- <li class="<?= ($action=='guide_Alltour') ? 'active' : '' ?>">
             <a href="?action=guide_Alltour">Đặt tour</a>
-        </li>
+        </li> -->
 
         <li class="<?= ($action=='guide_pending_tour') ? 'active' : '' ?>">
             <a href="?action=guide_pending_tour">Tour chờ duyệt</a>

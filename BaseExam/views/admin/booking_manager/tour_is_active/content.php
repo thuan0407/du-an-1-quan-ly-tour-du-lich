@@ -50,6 +50,7 @@ if(isset($_GET['msg'])){
                     <th>SDT khách hàng</th>
                     <th>Thanh toán</th>
                     <th>TT.HDV</th>
+                    <th>Số chỗ</th>
                     <th>Hành động</th>
                 </tr>
             </thead>
@@ -77,13 +78,20 @@ if(isset($_GET['msg'])){
                                 <?php endif;?>
                             </td>
                             <td>
-                                <?php if($tt->status ==1): ?>
+                                <?php if($tt->status ==1 && $tt->id_tour_guide != null): ?>
                                     <p style="color:blue;">Đang chờ HDV</p>
-                                <?php elseif($tt->status == 2):?>
+                                <?php elseif($tt->status == 2 && $tt->id_tour_guide != null):?>
                                     <p style="color:green;">Đã có HDV</p>
                                 <?php else :?>
                                     <p style="color:red;">Chưa có HDV</p>
                                 <?php endif;?>
+                            </td>
+                            <td>
+                                <?php if($tt->quantity >= $tt->tour_minimum_scope): ?>
+                                    <p style="color:green;"><?= $tt->quantity ?> / <?= $tt->tour_scope ?></p>
+                                <?php else: ?>
+                                    <p style="color:red;"><?= $tt->quantity ?> / <?= $tt->tour_scope ?></p>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <a href="?action=tour_is_active_detail&id=<?=$tt->id?>" class="btn btn-warning">Xem chi tiết</a>

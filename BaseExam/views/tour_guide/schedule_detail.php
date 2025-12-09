@@ -1,9 +1,4 @@
 
-
-
-
-
-
 <div class="detail-box">
   <h2>📌 Chi tiết lịch làm việc</h2>
   <div style="width:90%; margin-left:50px;">
@@ -47,8 +42,6 @@
           <th>STT</th>
           <th>Tên khách</th>
           <th>SĐT</th>
-          <th>Danh sách khách</th>
-          <th>Số lượng</th>
           <th>Ghi chú</th>
         </tr>
       </thead>
@@ -58,15 +51,8 @@
             <td><?= $index + 1 ?></td>
             <td><?= htmlspecialchars($detail->CusName) ?></td>
             <td>0<?= htmlspecialchars($detail->CusPhone) ?></td>
+            <td><?= nl2br(htmlspecialchars($cust->note ?? '')) ?></td>
 
-          <td>
-              <img src="<?= BASE_URL . $cust->list_customer ?>"
-                  style="width:120px; cursor:pointer;"
-                  onclick="showImg(this.src)">
-          </td>
-
-            <td><?= htmlspecialchars($cust->quantity) ?></td>
-            <td><?= nl2br(htmlspecialchars($cust->note)) ?></td>
           </tr>
         <?php endforeach; ?>
       </tbody>
@@ -76,14 +62,32 @@
   <?php endif; ?>
 
   <a href="?action=schedule_guide" class="back-btn">← Quay lại</a>
+  <a href="?action=updateStatusTour&id=<?= $detail->book_id ?>" 
+   class="end-btn"
+   onclick="return confirm('Bạn có chắc chắn muốn kết thúc tour không?')">
+    ✔ Kết thúc tour
+</a>
 </div>
 <style>
+  .end-btn {
+  float: right;
+  margin-top: 15px;
+  padding: 8px 18px;
+  background: #e63946;
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.end-btn:hover {
+  background: #b51729;
+}
     .detail-box {
   background: #fff;
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  max-width: 700px;
+  max-width: 100% ;
   margin: 0 auto;
 }
 

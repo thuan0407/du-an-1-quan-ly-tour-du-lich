@@ -69,6 +69,38 @@ class Tour_diary_Model extends BaseModel{
     }
 
 
+    // lấy danh sách nhật ký theo id lịch khời hành
+    public function getByDepartureSchedule($id_departure_schedule) {
+        try {
+            $sql = "SELECT * FROM tour_diary 
+                    WHERE id_departure_schedule = :id_departure_schedule
+                    ORDER BY date DESC";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':id_departure_schedule' => $id_departure_schedule]);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC); // lấy dưới dạng mảng kết hợp
+
+            $list = [];
+            foreach ($data as $row) {
+                $diary = new Tour_diary();
+                $diary->id                     = $row['id'];
+                $diary->date                   = $row['date'];
+                $diary->content                = $row['content'];
+                $diary->img                     = $row['img'];
+                $diary->service_provider_evaluation = $row['service_provider_evaluation'];
+                $diary->note                   = $row['note'];
+                $diary->id_tour_guide          = $row['id_tour_guide'];
+                $diary->id_departure_schedule  = $row['id_departure_schedule'];
+
+                $list[] = $diary;
+            }
+
+            return $list; // trả về mảng các object Tour_diary
+        } catch (PDOException $err) {
+            echo "Lỗi lấy nhật ký theo lịch khởi hành: " . $err->getMessage();
+            return [];
+        }
+    }
+
 
         // Cập nhật nhật ký (có thể dùng đến)
     // public function update($id, $content, $img = null, $service_provider_evaluation = '', $note = '') {

@@ -47,12 +47,12 @@
                  alt="Ảnh nhật ký" class="diary-img">
           <?php endif; ?>
   <!-- xóa nhật ký (có thể dùng đến) -->
-<!-- <div class="delete-icon">
+<div class="delete-icon">
   <a href="?action=delete_diary&id=<?= $d->id ?>&schedule_id=<?= $_GET['schedule_id'] ?>"
      onclick="return confirm('Bạn có chắc chắn muốn xóa nhật ký này?');">
      🗑️
   </a>
-</div> -->
+</div>
         </div>
       </div>
     <?php endforeach; ?>

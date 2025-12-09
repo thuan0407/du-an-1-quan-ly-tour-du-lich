@@ -14,30 +14,56 @@ class Departure_schedule{
 class departure_schedule_Model extends BaseModel{
     public function create($departure_schedule){
         try {
-            $sql = "INSERT INTO `departure_schedule` (`id`, `start_date`, `end_date`, `status`, `id_tour_guide`, `note`, `incidental_costs`, `start_location`, `end_location`) 
-            VALUES (NULL, 
-            '".$departure_schedule->start_date."', 
-            '".$departure_schedule->end_date."', 
-            '".$departure_schedule->status."', 
-            '".$departure_schedule->id_tour_guide."', 
-            '".$departure_schedule->note."', NULL, 
-            '".$departure_schedule->start_location."', 
-            '".$departure_schedule->end_location."');";
-             $data=$this->pdo->exec($sql);
+            $sql = "INSERT INTO departure_schedule (
+                        start_date, end_date, status, id_tour_guide, note, incidental_costs, start_location, end_location
+                    ) VALUES (
+                        :start_date, :end_date, :status, :id_tour_guide, :note, NULL, :start_location, :end_location
+                    )";
+
+            $stmt = $this->pdo->prepare($sql);
+
+            $stmt->execute([
+                ':start_date'      => $departure_schedule->start_date,
+                ':end_date'        => $departure_schedule->end_date,
+                ':status'          => $departure_schedule->status,
+                ':id_tour_guide'   => $departure_schedule->id_tour_guide, // NULL OK
+                ':note'            => $departure_schedule->note,
+                ':start_location'  => $departure_schedule->start_location,
+                ':end_location'    => $departure_schedule->end_location
+            ]);
+
             return $this->pdo->lastInsertId();
 
         } catch (PDOException $e){
-            echo "Lỗi insert img: " . $e->getMessage();
+            echo "Lỗi insert departure_schedule: " . $e->getMessage();
             return false;
         }
     }
-
     public function get_departure_schedule($id){
         $sql ="SELECT * FROM departure_schedule WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id'=>$id]);
         return $departure_schedule =$stmt->fetch(PDO::FETCH_OBJ);
     }
+
+    public function update__tour_guide($id_departure_schedule, $new_guide_id) {  //thay đổi HDV cho lịch khởi hành
+    try {
+        $sql = "UPDATE departure_schedule 
+                SET id_tour_guide = :guide_id 
+                WHERE id = :schedule_id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':guide_id' => $new_guide_id,
+            ':schedule_id' => $id_departure_schedule
+        ]);
+
+        return true; // Cập nhật thành công
+    } catch (PDOException $err) {
+        echo "Lỗi cập nhật hướng dẫn viên: " . $err->getMessage();
+        return false;
+    }
+}
+
 
  //code thằng e Hùng (lấy all lịch làm việc, all lịch lm vc của hdv, lịch theo ngày(chưa dùng), chi tiết lịch)
     // Lấy tất cả lịch làm việc
@@ -56,24 +82,27 @@ class departure_schedule_Model extends BaseModel{
     }
 
     // Lấy lịch làm việc theo hướng dẫn viên
-    public function getByGuide($guide_id) {
-        try {
-            $sql = "SELECT 
-                        s.id, s.start_date, s.end_date, s.status, s.note, s.incidental_costs,
-                        t.name AS tour_name
-                    FROM departure_schedule s
-                    LEFT JOIN book_tour b ON s.id = b.id_departure_schedule
-                    LEFT JOIN tour t ON b.id_tour = t.id
-                    WHERE s.id_tour_guide = ?
-                    AND b.status = 2";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([$guide_id]);
-            return $stmt->fetchAll(PDO::FETCH_OBJ);
-        } catch (PDOException $err) {
-            echo "Lỗi truy vấn lịch làm việc theo hướng dẫn viên: " . $err->getMessage();
-            return [];
-        }
+public function getByGuide($guide_id) {
+    try {
+        $sql = "SELECT 
+                    s.id, s.start_date, s.end_date, s.status, s.note, s.incidental_costs,
+                    t.name AS tour_name
+                FROM departure_schedule s
+                LEFT JOIN book_tour b 
+                    ON s.id = b.id_departure_schedule 
+                LEFT JOIN tour t 
+                    ON b.id_tour = t.id
+                WHERE s.id_tour_guide = ?
+                AND b.status = 2";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$guide_id]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    } catch (PDOException $err) {
+        echo "Lỗi truy vấn lịch làm việc theo hướng dẫn viên: " . $err->getMessage();
+        return [];
     }
+}
 
 
     // Lấy lịch theo ngày cụ thể (chưa dùng)
@@ -105,7 +134,8 @@ class departure_schedule_Model extends BaseModel{
                         b.number_of_nights AS nights,
                         b.customername AS CusName,
                         b.phone AS CusPhone,
-                        b.id AS book_id
+                        b.id AS book_id,
+                        b.quantity AS quantity
                     FROM departure_schedule s
                     LEFT JOIN book_tour b ON s.id = b.id_departure_schedule
                     LEFT JOIN tour t ON b.id_tour = t.id

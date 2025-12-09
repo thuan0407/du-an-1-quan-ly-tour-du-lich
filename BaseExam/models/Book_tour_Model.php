@@ -16,20 +16,29 @@ class Book_tour{
     public $tour_name;
     public $images;
     public $pay_status;
+    public $amount_money;
+    public $tour_scope;
+    public $tour_minimum_scope;
 }
 
 class Book_tour_Model extends BaseModel{
-    public function get_book_tour_all($status){              
-        try{
+    public function get_book_tour_all($status) {
+        try {
             $sql = "
-                SELECT MAX(p.status) AS pay_status, bk.*, t.name as tour_name, GROUP_CONCAT(i.img SEPARATOR '|') as images
-                FROM `book_tour` as bk
-                JOIN tour as t ON bk.id_tour = t.id
+                SELECT 
+                    bk.*, 
+                    t.name AS tour_name,
+                    GROUP_CONCAT(DISTINCT i.img SEPARATOR '|') AS images,
+                    MAX(p.status) AS pay_status,
+                    SUM(p.amount_money) AS amount_money
+                FROM book_tour bk
+                JOIN tour t ON bk.id_tour = t.id
                 LEFT JOIN img_tour i ON t.id = i.id_tour
                 LEFT JOIN pay p ON p.id_book_tour = bk.id
                 WHERE bk.status = ?
                 GROUP BY bk.id
             ";
+
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$status]);
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -52,6 +61,7 @@ class Book_tour_Model extends BaseModel{
                 $book_tour->customername          = $tt['customername'];
                 $book_tour->tour_name             = $tt['tour_name'];
                 $book_tour->pay_status            = $tt['pay_status'];
+                $book_tour->amount_money          = $tt['amount_money'] ?? 0;
                 $book_tour->images                = !empty($tt['images']) ? explode('|', $tt['images']) : [];
 
                 $list[] = $book_tour;
@@ -59,8 +69,8 @@ class Book_tour_Model extends BaseModel{
 
             return $list;
 
-        } catch (PDOException $err) {
-            echo "Lỗi truy vấn sản phẩm: " . $err->getMessage();
+        } catch(PDOException $err) {
+            echo "Lỗi truy vấn book_tour: " . $err->getMessage();
             return [];
         }
     }
@@ -69,7 +79,7 @@ class Book_tour_Model extends BaseModel{
     public function get_book_tour_all_125(){   //lấy các booktour có trạng thái là 1,2,5              
         try{
             $sql = "
-                SELECT MAX(p.status) AS pay_status, bk.*, t.name as tour_name, GROUP_CONCAT(i.img SEPARATOR '|') as images
+                SELECT MAX(p.status) AS pay_status, bk.*, t.name as tour_name,t.scope as tour_scope,t.minimum_scope as tour_minimum_scope,GROUP_CONCAT(i.img SEPARATOR '|') as images
                 FROM `book_tour` as bk
                 JOIN tour as t ON bk.id_tour = t.id
                 LEFT JOIN img_tour i ON t.id = i.id_tour
@@ -99,6 +109,8 @@ class Book_tour_Model extends BaseModel{
                 $book_tour->customername          = $tt['customername'];
                 $book_tour->tour_name             = $tt['tour_name'];
                 $book_tour->pay_status            = $tt['pay_status'];
+                $book_tour->tour_scope            = $tt['tour_scope'];
+                $book_tour->tour_minimum_scope    = $tt['tour_minimum_scope'];
                 $book_tour->images                = !empty($tt['images']) ? explode('|', $tt['images']) : [];
 
                 $list[] = $book_tour;
@@ -113,43 +125,54 @@ class Book_tour_Model extends BaseModel{
     }
 
     public function get_book_tour($id){              
-        try{
-            $sql = "
-                SELECT bk.*, t.name as tour_name, GROUP_CONCAT(i.img SEPARATOR '|') as images
-                FROM `book_tour` as bk
-                JOIN tour as t ON bk.id_tour = t.id
-                LEFT JOIN img_tour i ON t.id = i.id_tour
-                WHERE bk.id = ?
-                GROUP BY bk.id
-            ";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([$id]);
-            $data = $stmt->fetch(PDO::FETCH_ASSOC);
-            if($data !== false){
-                $book_tour = new Book_tour();
-                $book_tour->id                    = $data['id'];
-                $book_tour->date                  = $data['date'];
-                $book_tour->total_amount          = $data['total_amount'];
-                $book_tour->note                  = $data['note'];
-                $book_tour->status                = $data['status'];
-                $book_tour->quantity              = $data['quantity'];
-                $book_tour->id_departure_schedule = $data['id_departure_schedule'];
-                $book_tour->id_tour_guide         = $data['id_tour_guide'];
-                $book_tour->id_tour               = $data['id_tour'];
-                $book_tour->number_of_days        = $data['number_of_days'];
-                $book_tour->number_of_nights      = $data['number_of_nights'];
-                $book_tour->phone                 = $data['phone'];
-                $book_tour->customername          = $data['customername'];
-                $book_tour->tour_name             = $data['tour_name'];
-                $book_tour->images                = !empty($data['images']) ? explode('|', $data['images']) : [];
-                return $book_tour;
-            }
+    try {
+        $sql = "
+            SELECT 
+                bk.*,
+                t.scope AS tour_scope,
+                t.minimum_scope AS tour_minimum_scope,
+                t.name AS tour_name,
+                GROUP_CONCAT(i.img SEPARATOR '|') AS images
+            FROM book_tour AS bk
+            JOIN tour AS t ON bk.id_tour = t.id
+            LEFT JOIN img_tour i ON t.id = i.id_tour
+            WHERE bk.id = ?
+            GROUP BY bk.id
+        ";
 
-        } catch (PDOException $err) {
-            echo "Lỗi truy vấn sản phẩm: " . $err->getMessage();
-            return [];
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$id]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if($data !== false){
+            $book_tour = new Book_tour();
+            $book_tour->id                    = $data['id'];
+            $book_tour->date                  = $data['date'];
+            $book_tour->total_amount          = $data['total_amount'];
+            $book_tour->note                  = $data['note'];
+            $book_tour->status                = $data['status'];
+            $book_tour->quantity              = $data['quantity'];
+            $book_tour->id_departure_schedule = $data['id_departure_schedule'];
+            $book_tour->id_tour_guide         = $data['id_tour_guide'];
+            $book_tour->id_tour               = $data['id_tour'];
+            $book_tour->number_of_days        = $data['number_of_days'];
+            $book_tour->number_of_nights      = $data['number_of_nights'];
+            $book_tour->phone                 = $data['phone'];
+            $book_tour->customername          = $data['customername'];
+            $book_tour->tour_name             = $data['tour_name'];
+            $book_tour->tour_scope            = $data['tour_scope'];
+            $book_tour->tour_minimum_scope    = $data['tour_minimum_scope'];
+            $book_tour->images                = !empty($data['images']) ? explode('|', $data['images']) : [];
+
+            return $book_tour;
         }
+
+    } catch (PDOException $err) {
+        echo "Lỗi truy vấn sản phẩm: " . $err->getMessage();
+        return [];
     }
+}
+
 
         public function getidbooking() {                           //lấy id_tour ở bảng book_tour
             try {
@@ -167,25 +190,31 @@ class Book_tour_Model extends BaseModel{
         
   public function create($book_tour){
     try {
-        $sql = "INSERT INTO `book_tour` 
-            (`id`, `date`, `total_amount`, `note`, `status`, `quantity`, `id_departure_schedule`, `id_tour_guide`, `id_tour`, `number_of_days`, `number_of_nights`, `phone`, `customername`) 
-            VALUES (
-                NULL, 
-                '".$book_tour->date."', 
-                '".$book_tour->total_amount."', 
-                '".$book_tour->note."', 
-                '".$book_tour->status."', 
-                '".$book_tour->quantity."', 
-                '".$book_tour->id_departure_schedule."', 
-                '".$book_tour->id_tour_guide."', 
-                '".$book_tour->id_tour."', 
-                '".$book_tour->number_of_days."', 
-                '".$book_tour->number_of_nights."', 
-                '".$book_tour->phone."', 
-                '".$book_tour->customername."'
-            );";
+        $sql = "INSERT INTO book_tour (
+            date, total_amount, note, status, quantity, id_departure_schedule, 
+            id_tour_guide, id_tour, number_of_days, number_of_nights, phone, customername
+        ) VALUES (
+            :date, :total_amount, :note, :status, :quantity, :id_departure_schedule,
+            :id_tour_guide, :id_tour, :number_of_days, :number_of_nights, :phone, :customername
+        )";
 
-        $data = $this->pdo->exec($sql);
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute([
+            ':date'                 => $book_tour->date,
+            ':total_amount'         => $book_tour->total_amount,
+            ':note'                 => $book_tour->note,
+            ':status'               => $book_tour->status,
+            ':quantity'             => $book_tour->quantity,
+            ':id_departure_schedule'=> $book_tour->id_departure_schedule,
+            ':id_tour_guide'        => empty($book_tour->id_tour_guide) ? null : $book_tour->id_tour_guide,
+            ':id_tour'              => $book_tour->id_tour,
+            ':number_of_days'       => $book_tour->number_of_days,
+            ':number_of_nights'     => $book_tour->number_of_nights,
+            ':phone'                => $book_tour->phone,
+            ':customername'         => $book_tour->customername
+        ]);
+
         return $this->pdo->lastInsertId();
 
     } catch (PDOException $e){
@@ -281,6 +310,16 @@ public function update_book_tour($book_tour)
         $stmt->execute([
             ':id'           =>$id,
             ':id_tour_guide'=>$id_tour_guide
+        ]);
+    }
+
+    public function update_price_total($book_tour){
+        $sql = "UPDATE book_tour SET quantity = :quantity, total_amount = :total_amount WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            ':quantity' => $book_tour->quantity,
+            ':total_amount' => $book_tour->total_amount,
+            ':id' => $book_tour->id
         ]);
     }
 
@@ -396,6 +435,7 @@ public function update_book_tour($book_tour)
             FROM book_tour AS b
             JOIN tour AS t ON t.id = b.id_tour
             WHERE b.id_tour_guide = ?
+            AND b.status = 1
             ORDER BY b.id DESC
         ";
 
@@ -404,6 +444,29 @@ public function update_book_tour($book_tour)
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function getBookTourDetail($id)
+        {
+            $sql = "SELECT 
+                        b.*, 
+                        t.name AS tour_name,
+                        t.describe AS tour_description,
+                        b.number_of_days AS tour_days,
+                        b.number_of_nights AS tour_nights
+                    FROM book_tour AS b
+                    JOIN tour AS t ON t.id = b.id_tour
+                    WHERE b.id = ?";
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$id]);
+            return $stmt->fetch(PDO::FETCH_OBJ);
+        }
+
+    public function updateBookTourStatus($id, $status)
+        {
+            $sql = "UPDATE book_tour SET status = ? WHERE id = ?";
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([$status, $id]);
+        }
     public function getBookingsByTourAndStatus($tourId, $status = 3)
     {
         try {
@@ -422,6 +485,15 @@ public function update_book_tour($book_tour)
         } catch (PDOException $e) {
             return [];
         }
+    }
+
+
+    
+    //code cùng hùng
+    public function updateStatus($id){
+        $sql = "UPDATE book_tour SET status = 3 WHERE id = ? AND status = 2";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([$id]);
     }
 }
 

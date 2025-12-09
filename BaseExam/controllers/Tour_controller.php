@@ -56,7 +56,8 @@ class Tour_Controller extends Base_Controller{
         $tour->date             = date("Y-m-d");
         $tour->id_tourtype      = $_POST['id_tourtype'] ?? null;
         $tour->type_tour        = $_POST['type_tour'] ?? 1;
-        $tour->location        = $_POST['type_tour'] ?? 1;
+        $tour->minimum_scope    = $_POST['minimum_scope'];
+        // $tour->location         = $_POST['type_tour'] ?? 1;
 
         // 2. Lưu tour vào DB
         $tour_id = $this->tourModel->insert($tour);
@@ -265,6 +266,7 @@ public function tour_detail($id)
         $tour_detail->date             = $_POST['date'];
         $tour_detail->id_tourtype      = $_POST['id_tourtype'];
         $tour_detail->status           = $_POST['status'];
+        $tour_detail->minimum_scope    = $_POST['minimum_scope'];
         $this->tourModel->update_tour($tour_detail);
 
         // Xử lý ảnh tour mới (xóa cũ nếu có upload)

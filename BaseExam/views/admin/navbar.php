@@ -90,7 +90,7 @@
 
   <!-- Sidebar -->
   <div id="sidebar">
-    <h4> <a href="?action=home_admin" class="px-3 pt-3">Home</a></h4>
+    <h3> <a href="?action=home_admin" class="px-3 pt-3">Home</a></h3>
     <a href="?action=tour_catalog_management"><i class="fa-solid fa-map-location-dot"></i> Quản lý danh mục tour</a>
     <a href="?action=supplier_management"><i class="fa-solid fa-ticket"></i> Quản lý nhà cung cấp</a>
     <a href="?action=human_resource_management"><i class="fa-solid fa-users"></i> Quản lý hướng dẫn viên</a>
