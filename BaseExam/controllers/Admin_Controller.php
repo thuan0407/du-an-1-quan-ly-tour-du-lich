@@ -467,6 +467,11 @@ function supplier_management() {
     }
 
 
+    function getUserById(){
+        $id = 10;
+        $user = $this->userModel->getUserById($id);
+        include 'views/admin/navabr.php'; //gọi view
+    }
     
 }
  

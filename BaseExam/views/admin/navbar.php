@@ -1,4 +1,23 @@
 <?php
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Kiểm tra user đã login chưa
+$user = null;
+if (isset($_SESSION['user'])) {
+    $user_id = $_SESSION['user']['id'] ?? null;
+    $user_name = $_SESSION['user']['name'] ?? '';
+    $user_role = $_SESSION['user']['role'] ?? '';
+    $user_img = $_SESSION['user']['img'] ?? '';
+    
+    // Tạo đối tượng user tạm để tiện dùng
+    $user = new stdClass();
+    $user->id = $user_id;
+    $user->name = $user_name;
+    $user->role = $user_role;
+    $user->img  = $user_img;
+}
 // navbar.php
 ?>
 <!DOCTYPE html>
@@ -14,64 +33,6 @@
   <!-- thư viện icon -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">  
 
-
-  <style>
-
-    /* Sidebar */
-    #sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 250px;
-      background-color: #0d345bff;
-      color: white;
-      transform: translateX(-250px);
-      transition: transform 0.3s ease;
-      z-index: 1040;
-      padding-top: 56px; /* để tránh navbar */
-    }
-
-    #sidebar.active {
-      transform: translateX(0);
-    }
-
-    #sidebar a {
-      color: #c3cfdcff;
-      text-decoration: none;
-      display: block;
-      padding: 10px 20px;
-      margin: 5px 0;
-      border-radius: 5px;
-    }
-
-    #sidebar a:hover {
-      background-color: #154a7fff;
-      color: #fff;
-    }
-
-    /* Dịch nội dung sang phải khi sidebar mở */
-    body.sidebar-open .content-wrapper {
-      margin-left: 250px;
-      transition: margin-left 0.3s ease;
-    }
-
-    /* Navbar */
-    .navbar {
-      z-index: 1050;
-    }
-    .content-wrapper {
-        margin-left: 0;
-        padding-top: 20px; /* tránh navbar che nội dung */
-        transition: margin-left 0.3s ease;
-    }
-    /* sáng theo các mục khi đc click */
-    #sidebar a.active {     
-    background-color: #154a7fff !important;
-    color: #ffffffff !important;
-}
-
-  </style>
 </head>
 <body >
 
@@ -84,10 +45,15 @@
       </button>
       <a class="navbar-brand ms-2" href="?action=home_admin">Hệ thống quản lý</a>
 
-      <!-- Search bar -->
-       <img src="" alt="">
+      <!-- Ảnh đại diện -->
+       <div>
+          <label for="" style="color:white;">Xin chào <?=$user->name?>!</label>
+         <img src="<?= BASE_ASSETS_UPLOADS.$user->img ?>" 
+            alt="Ảnh đại diện" 
+            style="width:60px; height:60px; border-radius:50%; object-fit:cover; margin-right:50px;">
+        </div>
   </nav>
-
+  
   <!-- Sidebar -->
   <div id="sidebar">
     <h3> <a href="?action=home_admin" class="px-3 pt-3">Home</a></h3>
@@ -102,7 +68,7 @@
  </a>
 
     <!-- Dropdown tài khoản -->
-    <!-- <div class="mt-3 px-3">
+    <div class="mt-3 px-3">
       <a class="dropdown-toggle text-white text-decoration-none" data-bs-toggle="collapse" href="#accountMenu">
         <i class="fa-solid fa-user"></i> Tài khoản
       </a>
@@ -111,7 +77,7 @@
         <a href="?action=guide_registration">Đăng ký</a>
         <a href="?action=logout_admin" onclick="return confim('Bạn có chắc là muốn Đăng xuất không?')">Đăng xuất</a>
       </div>
-    </div> -->
+    </div>
   </div>
 
 
@@ -170,3 +136,60 @@
 
 </body>
 </html>
+  <style>
+
+    /* Sidebar */
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 250px;
+      background-color: #0d345bff;
+      color: white;
+      transform: translateX(-250px);
+      transition: transform 0.3s ease;
+      z-index: 1040;
+      padding-top: 70px; /* để tránh navbar */
+    }
+
+    #sidebar.active {
+      transform: translateX(0);
+    }
+
+    #sidebar a {
+      color: #c3cfdcff;
+      text-decoration: none;
+      display: block;
+      padding: 10px 20px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+
+    #sidebar a:hover {
+      background-color: #154a7fff;
+      color: #fff;
+    }
+
+    /* Dịch nội dung sang phải khi sidebar mở */
+    body.sidebar-open .content-wrapper {
+      margin-left: 250px;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Navbar */
+    .navbar {
+      z-index: 1050;
+    }
+    .content-wrapper {
+        margin-left: 0;
+        padding-top: 20px; /* tránh navbar che nội dung */
+        transition: margin-left 0.3s ease;
+    }
+    /* sáng theo các mục khi đc click */
+    #sidebar a.active {     
+    background-color: #154a7fff !important;
+    color: #ffffffff !important;
+}
+
+  </style>

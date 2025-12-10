@@ -104,24 +104,67 @@ span {
     </style>
 </head>
 <body>
-    <form method="post">
+    <form method="post" id="loginForm">
     <h4 style="text-align:center;">Đăng nhập</h2>
   <div class="row mb-3">
     <label for="exampleInputEmail1" class="form-label">Email</label>
-    <input type="email" class="form-control" id="exampleInputEmail1" name="email" required>
+    <input type="text" class="form-control" id="exampleInputEmail1" name="email">
+    <span id="" style="color:red;"><?=$err_email?></span>
 
   </div>
   <div class="row mb-3">
     <label for="exampleInputPassword1" class="form-label">Password</label>
-    <input type="password" class="form-control" id="exampleInputPassword1" name="password" required>
+    <input type="password" class="form-control" id="exampleInputPassword1" name="password">
+    <span id="" style="color:red;"><<?=$err_password?>/span>
   </div>
 
 
   </div>
-  <span style="margin-left:100px; color:red;";><?=$err?></span><br>
+      <!-- Hiển thị lỗi PHP -->
+<span style="color:red; display:block; text-align:center;">
+    <?= isset($err) ? $err : '' ?>
+</span>
   <button type="submit" class="btn btn-primary" name="login_user_admin">Đăng nhập</button>
   <a href="?action=guide_registration">Đăng ký</a>
 </form>
 
+<!-- <script>
+  
+    document.getElementById("loginForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    //khai báo biến giá trị
+    let email = document.getElementById("exampleInputEmail1").value.trim();
+    let password = document.getElementById("exampleInputPassword1").value.trim();
+
+    // Xóa thông báo lỗi
+    document.getElementById("err_email").innerHTML = "";
+    document.getElementById("err_password").innerHTML = "";
+
+    // khai báo biến kiểm tra
+    let check = true;
+    if(email == ""){
+        document.getElementById("err_email").innerHTML = "Không được bỏ trống";
+        check = false;
+    }else if(email.length <3 || email.length > 30){
+        document.getElementById("err_email").innerHTML = "Độ dài của username phải nằm trong khoảng 3 đến 30 ký tự";
+        check = false;
+    }
+
+    if(password == ""){
+        document.getElementById("err_password").innerHTML = "Không được bỏ trống";
+        check = false;
+    }else if(password.length <6 || password.length > 10){
+        document.getElementById("err_password").innerHTML = "Độ dài của password phải nằm trong khoảng 6 đến 10 ký tự";
+        check = false;
+    }
+
+    if(check){
+        this.submit(); // gửi form lên PHP khi mọi thứ hợp lệ
+    }
+
+})
+
+</script> -->
 </body>
 </html>

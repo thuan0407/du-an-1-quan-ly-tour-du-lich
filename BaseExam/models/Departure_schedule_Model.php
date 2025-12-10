@@ -46,7 +46,7 @@ class departure_schedule_Model extends BaseModel{
         return $departure_schedule =$stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function update__tour_guide($id_departure_schedule, $new_guide_id) {  //thay đổi HDV cho lịch khởi hành
+    public function update_tour_guide($id_departure_schedule, $new_guide_id) {  //thay đổi HDV cho lịch khởi hành
     try {
         $sql = "UPDATE departure_schedule 
                 SET id_tour_guide = :guide_id 

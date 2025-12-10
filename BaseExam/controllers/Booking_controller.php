@@ -261,7 +261,7 @@ class Booking_controller extends Base_Controller{
         if(isset($_POST['update_tour_guide'])){      //cập nhật hướng dẫn viên cho book tour
             $this->booktourModel->update_tour_guide($_POST['id_tour_guide'], $book_tour->id);
             $this->booktourModel->update_book_tour_status($id,1);
-            $this->departurescheduleModel->update__tour_guide($id_departure_schedule,$_POST['id_tour_guide']);
+            $this->departurescheduleModel->update_tour_guide($id_departure_schedule,$_POST['id_tour_guide']);
             header("Location:?action=tour_is_active_detail&id={$id}&msg=success");
         }
 

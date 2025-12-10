@@ -8,49 +8,69 @@ class Login_Register_Controller extends Base_Controller{
 
 
     //đăng nhập phía người dùng admin
-    function login_user_admin(){
-        $err="";
-        $lists = $this->userModel->all();
-        if(isset($_POST['login_user_admin'])){
-            $email       =trim($_POST['email']);
-            $password    =trim($_POST['password']);
-            $check       = false;
+function login_user_admin() {
+    $err = "";
+    $err_email = "";
+    $err_password = "";
+    $lists = $this->userModel->all();
 
+    if(isset($_POST['login_user_admin'])){
+        $email = trim($_POST['email']);
+        $password = trim($_POST['password']);
+        $hasError = false;
+
+        // Kiểm tra email
+        if($email == ""){
+            $err_email = "Không được bỏ trống";
+            $hasError = true;
+        } elseif(strlen($email) < 3 || strlen($email) > 30){
+            $err_email = "Độ dài của username phải nằm trong khoảng 3 đến 30 ký tự";
+            $hasError = true;
+        }
+
+        // Kiểm tra password
+        if($password == ""){
+            $err_password = "Không được bỏ trống";
+            $hasError = true;
+        } elseif(strlen($password) < 6 || strlen($password) > 10){
+            $err_password = "Độ dài của password phải nằm trong khoảng 6 đến 10 ký tự";
+            $hasError = true;
+        }
+
+        // Chỉ kiểm tra login nếu form hợp lệ
+        if(!$hasError){
+            $checkLogin = false;
             foreach($lists as $tt){
                 if($email === $tt->email){
-                    
-                    if($tt->status !==1){                  //nếu tài khoản bị khóa sẽ báo lỗi
+                    if($tt->status != 1){
                         $err = "Tài khoản đã bị khóa";
                         break;
                     }
 
                     if(password_verify($password, $tt->password)){
-                        $check =true;
-                        $_SESSION['user']=[
-                            'id'   =>$tt->id,
-                            'name' =>$tt->name,
-                            'role' =>$tt->role,
+                        $checkLogin = true;
+                        $_SESSION['user'] = [
+                            'id'   => $tt->id,
+                            'name' => $tt->name,
+                            'role' => $tt->role,
+                            'img'  => $tt->img,
                         ];
 
-
-                        if($tt->role ===1){
-                            header("Location: ?action=home_admin");
-                            exit;
-                        }
-                        else{
-                            header("Location: ?action=home_user");
-                            exit;
-                        }
+                        header("Location: ?action=" . ($tt->role === 1 ? "home_admin" : "home_user"));
+                        exit;
                     }
                 }
             }
-            if(!$check){
-                $err ="Kiểm tra lại tài khoàn và mật khẩu của bạn";
+
+            if(!$checkLogin && $err == ""){
+                $err = "Username hoặc password đã nhập sai";
             }
-            
         }
-        include 'views/login_register/login_admin.php';
     }
+
+    include 'views/login_register/login_admin.php';
+}
+
 
     
 
@@ -101,7 +121,7 @@ public function guide_registration() {
         if($email_exists){
             $err = "Email đã được đăng ký";
         }
-        else if(empty($user->name) || empty($user->number) || empty($user->password) || empty($user->email)){
+        else if(empty($user->name) || empty($user->password) || empty($user->email)){
             $err = "Kiểm tra lại các trường dữ liệu";
         }
         else{

@@ -39,7 +39,35 @@ class User_Model extends BaseModel{
             echo "Lỗi truy vấn sản phẩm: " . $err->getMessage();
         }
         }
+// Lấy thông tin một user theo ID
+    public function getUserById($id){
+        try {
+            $sql = "SELECT * FROM `user` WHERE `id` = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(['id' => $id]);
+            $tt = $stmt->fetch();
 
+            if ($tt) {
+                $user = new User();
+                $user->id            = $tt['id'];
+                $user->name          = $tt['name'];
+                $user->email         = $tt['email'];
+                $user->phone_number  = $tt['phone_number'];
+                $user->img           = $tt['img'];
+                $user->password      = $tt['password'];
+                $user->role          = $tt['role'];
+                $user->status        = $tt['status'];
+                $user->sex           = $tt['sex'];
+                $user->date          = $tt['date'];
+                return $user;
+            } else {
+                return null; // không tìm thấy user
+            }
+
+        } catch (PDOException $err) {
+            echo "Lỗi truy vấn user: " . $err->getMessage();
+        }
+    }
 
    public function create(user $user){
         try{
