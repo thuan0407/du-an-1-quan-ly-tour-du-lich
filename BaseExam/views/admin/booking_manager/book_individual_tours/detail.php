@@ -43,11 +43,12 @@
                         <label>Số chỗ tối đa: <?= $tour->scope ?></label>
                     </div>
                     <input type="hidden" id="minimum_scope" value="<?= $tour->minimum_scope ?>">
+                    <input type="hidden" id="max_scope" value="<?= $tour->scope ?>">
 
 
                     <div class="d-flex">
                         <label for="">Số chỗ:</label> 
-                        <input type="number" id="scope" oninput="add_scope()" value="1" name="quantity" class="form-control" required><br>
+                        <input type="number" id="scope" oninput="add_scope()" value="1" name="quantity" class="form-control" min="1" max="<?= $tour->scope ?>" required><br>
 
                         <label for="">Số ngày:</label> 
                         <input type="hidden" id="base_day" value="<?=$tour->number_of_days?>">
@@ -96,6 +97,15 @@
                     <input type="text" name="content_spceail" class="form-control" placeholder="Nhập yêu cầu đặc biệt..." required><br>
                 </div>
 
+                 <h4>Hướng dẫn viên</h4>
+                <div>
+                    <select name="tour_guide_id" id="" class="form-control" required>
+                        <?php foreach($list_guide as $l_g): ?>
+                        <option value="<?=$l_g->id?>" <?= ($tour->type_tour == $l_g->type_guide && $l_g->status ==1 ? 'selected': '') ?>><?=$l_g->name?></option>
+                        <?php endforeach; ?>
+                    </select><br>
+                </div>
+
                 <!-- Hướng dẫn viên -->
                 <div id="HDV"></div>
 
@@ -105,7 +115,7 @@
                     <input type="text" name="name_contract" class="form-control" required>
 
                     <label for="">Giá trị hợp đồng</label>
-                    <input type="number" name="value_contract" class="form-control" placeholder="VNĐ" required>
+                    <input type="number" name="value_contract" class="form-control" min="1" placeholder="VNĐ" required>
 
                     <label for="">File hợp đồng</label>
                     <input type="file" name="content_contract" class="form-control" required>
@@ -144,7 +154,7 @@
                     </select>
 
                     <label for="">Số tiền</label>
-                    <input type="number" name="amount_money" class="form-control" placeholder="Số tiền khách trả trước..." required>
+                    <input type="number" id="amount_money" name="amount_money" class="form-control" placeholder="Số tiền khách trả trước... = 50% giá tổng" required>
 
                     <label for="">Ghi chú</label>
                     <input type="text" name="pay_note" class="form-control" placeholder="Có thể bỏ trống" > <br>
@@ -202,9 +212,8 @@
 
             </div>
 
-            <div class="d-flex">
-                <a href="?action=booking_tour" class="btn btn-danger form-control" >Quay lại</a>
-                <button type="submit" name="order_tour" class="btn btn-primary form-control" >Đặt tour</button>
+            <div class="d-flex ">
+                <div id="order_tour" class="flex-fill"></div>
             </div>
 
     </form>
@@ -224,6 +233,7 @@ function add_scope(){
     let base_price = parseFloat(document.getElementById("base_price").value) || 0; // giá gốc của tour (nhiều ngày)
     let base_day = parseInt(document.getElementById("base_day").value) || 1; // số ngày tour gốc
     let number_day = parseInt(document.getElementById("number_of_days").value) || base_day; // số ngày hiện tại
+    let max_scope = parseInt(document.getElementById("max_scope").value) || 0; // số ngày hiện tại
 
     // tính giá 1 ngày 1 người
     let price_per_day_per_person = base_price / base_day;
@@ -231,24 +241,21 @@ function add_scope(){
     // tính tổng tiền = số người × số ngày × giá 1 ngày 1 người
     let total = scope * number_day * price_per_day_per_person;
 
-    document.getElementById("price").value = total.toFixed(0); // làm tròn VNĐ
+    document.getElementById("price").value = Math.round(total); // làm tròn VNĐ
 
     // hiển thị HDV nếu đủ số người tối thiểu
     let html = "";
-    if(scope >= minimum_scope){
+    if(scope >= minimum_scope &&scope <= max_scope){
         html +=
         `
-        <h4>Hướng dẫn viên</h4>
-        <div>
-            <select name="tour_guide_id" id="" class="form-control" required>
-                <?php foreach($list_guide as $l_g): ?>
-                <option value="<?=$l_g->id?>" <?= ($tour->type_tour == $l_g->type_guide && $l_g->status ==1 ? 'selected': '') ?>><?=$l_g->name?></option>
-                <?php endforeach; ?>
-            </select><br>
-        </div>
+         <button type="submit" name="order_tour" class="btn btn-primary form-control" >Đặt tour</button>
         `;
     }
-    document.getElementById("HDV").innerHTML = html;
+    document.getElementById("order_tour").innerHTML = html;
+
+    let deposit = total*0.5;
+    document.getElementById("amount_money").value = Math.round(deposit);
+
 }
 
 function add_number_of_days() { 

@@ -67,8 +67,9 @@
                         $tour_guide->sex               =$data['sex'];
                         $tour_guide->health            =$data['health'];
                         $tour_guide->year_birth        =$data['year_birth'];
+                        return $tour_guide;
                     }
-                    return $tour_guide;
+                    
 
                 }catch (PDOException $err) {
                 echo "Lỗi truy vấn sản phẩm: " . $err->getMessage();

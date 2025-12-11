@@ -39,7 +39,7 @@ if(isset($_GET['msg'])){
             <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
-        <table class="table talbe:hover">
+        <table class="table table-hover">
             <thead>
                 <tr>
                     <th>STT</th>

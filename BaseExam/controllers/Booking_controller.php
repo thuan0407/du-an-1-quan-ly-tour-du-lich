@@ -47,6 +47,8 @@ class Booking_controller extends Base_Controller{
     include 'views/admin/booking_manager/book_individual_tours/content.php';
 }
 
+ 
+    //tạo booking
     function booking_individual_tours_detail($id){    //đặt tour
         $tour              = $this->tourModel->find_tour($id);                         //lấy tour tương ứng với id
         $tour_img          = $this->imgtourModel->get_img_tour($id);                   //lấy ảnh tour ở dạng một chiều
@@ -190,6 +192,9 @@ class Booking_controller extends Base_Controller{
         include 'views/admin/booking_manager/tour_is_active/content.php';
     }
 
+
+
+    //tạo đang hoạt đọng
     function tour_is_active_detail($id){
         $book_tour         = $this->booktourModel->get_book_tour($id);
         $id_tour           = $book_tour->id_tour;
@@ -229,17 +234,17 @@ class Booking_controller extends Base_Controller{
 
         if(isset($_POST['cancel'])){                                                                                 //hủy tour
             $amount_money = isset($_POST['amount_money_pay']) ? floatval($_POST['amount_money_pay']) : 0;
-        if ($amount_money < 0 || $amount_money > 99999999.99) {
+        if ($amount_money > 99999999.99) {
             echo "Giá trị thanh toán không hợp lệ!";
             return;
         }
         $pay1 = new Pay();   // pay mới
-        $pay1->date = date('Y-m-d');
-        $pay1->id_book_tour = $id;
-        $pay1->status = 1;
-        $pay1->amount_money = $_POST['amount_money_pay'];
-        $pay1->note = null;
-        $pay1->payment_method = 1;
+        $pay1->date           = date('Y-m-d');
+        $pay1->id_book_tour   = $id;
+        $pay1->status         = 2;
+        $pay1->amount_money   = $_POST['amount_money_pay'];
+        $pay1->note           = $_POST['note_pay'];
+        $pay1->payment_method = $_POST['payment_method'];
 
         $update_pay                        =  $this->payModel->create($pay1);                                          //thanh toán khi hủy mặc định là online
         $delete_contract                   =  $this->contractModel->delete_contract($book_tour->id);                   //xóa bảng hợp đồng
@@ -262,8 +267,29 @@ class Booking_controller extends Base_Controller{
             $this->booktourModel->update_tour_guide($_POST['id_tour_guide'], $book_tour->id);
             $this->booktourModel->update_book_tour_status($id,1);
             $this->departurescheduleModel->update_tour_guide($id_departure_schedule,$_POST['id_tour_guide']);
+
             header("Location:?action=tour_is_active_detail&id={$id}&msg=success");
         }
+
+
+        // // xử lý hoàn tất thanh toán
+        // if(isset($_POST['Update_completed_payment'])){      
+        //     $pay_2 = new Pay();
+
+        //     $pay_2->date           = date('Y-m-d');
+        //     $pay_2->status         = 2;
+        //     $pay_2->note           = $_POST['note_pay']; 
+        //     $pay_2->amount_money   = $_POST['amount_money_pay'];
+        //     $pay_2->id_book_tour   = $id;
+        //     $pay_2->payment_method = $_POST['payment_method'];
+
+        //     $this->payModel->create($pay_2);
+
+        //     header("Location:?action=tour_is_active_detail&id={$id}&msg=success");
+        // }
+
+
+    
 
         include 'views/admin/booking_manager/tour_is_active/detail.php';
     }
@@ -276,68 +302,70 @@ class Booking_controller extends Base_Controller{
         $book_tour = $this->booktourModel->get_book_tour($id_book_tour);      
         $customer_list = $this->customerlistModel->get_customer_list($id_book_tour);
         $tour = $this->tourModel->find_tour($book_tour->id_tour);
-        $pay = $this->payModel->get_latest_pay($id_book_tour);
+        $paid = $this->payModel->getTotalAmountByBooking($id_book_tour);  //lấy tổng tiền của tour 
 
-        if(isset($_POST['update'])){
-            $old_id = array_column($customer_list,'id');            
-            $new_id = $_POST['customer_id'] ?? [];                  
-            $delete_id = array_diff($old_id, $new_id);               
+            if(isset($_POST['update'])){ 
+        // --- CẬP NHẬT DANH SÁCH KHÁCH HÀNG ---
+        $old_id = array_column($customer_list,'id');            
+        $new_id = $_POST['customer_id'] ?? [];                  
+        $delete_id = array_diff($old_id, $new_id);               
 
-            foreach($delete_id as $d_id){                           
-                $this->customerlistModel->delete($d_id);
-            }
-
-            $names  = $_POST['name'] ?? [];
-            $phones = $_POST['phone'] ?? [];
-            $sexes  = $_POST['sex'] ?? [];
-            $ids    = $_POST['customer_id'] ?? [];
-
-            foreach($ids as $index => $id){                                 
-                if($id){ 
-                    $this->customerlistModel->update($id, [
-                        'name' => $names[$index],
-                        'phone'=> $phones[$index],
-                        'sex'  => $sexes[$index],
-                        'status'=>1
-                    ]);
-                } else {                                                     
-                    $this->customerlistModel->insert([
-                        'id_book_tour' => $id_book_tour,
-                        'name' => $names[$index],
-                        'phone'=> $phones[$index],
-                        'sex'  => $sexes[$index],
-                        'status'=>1
-                    ]);
-                }
-            }
-
-            //update lại giá số chỗ ở bảng book tour
-            $book_tour->quantity = isset($_POST['quantity']) ? $_POST['quantity'] : $book_tour->quantity;
-            $book_tour->total_amount = isset($_POST['total_money']) ? $_POST['total_money'] : $book_tour->total_amount;
-
-            $this->booktourModel->update_price_total($book_tour);
-
-            //tạo thanh toán mới bảng thanh toán (pay)
-            $pay1 = new Pay();
-            $pay1 ->date           = date('Y-m-d');
-            $pay1 ->payment_method = $_POST['payment_method'];
-            $pay1 ->amount_money   = $_POST['amount_money'];
-            $pay1 ->note           = $_POST['note'];
-            $pay1 ->id_book_tour   = $id_book_tour;
-
-            if($book_tour->total_amount <= $pay1->amount_money){
-                $pay1->status = 2; // đã thanh toán đủ
-            }else{
-                $pay1->status = 1; // chưa đủ
-            }
-
-            $this->payModel->create($pay1);  //tạo
-
-            
-            // Redirect và thêm thông báo
-            header("Location:?action=comtomer_list&id={$id_book_tour}&msg=success");
-            exit;
+        foreach($delete_id as $d_id){                           
+            $this->customerlistModel->delete($d_id);
         }
+
+        $names  = $_POST['name'] ?? [];
+        $phones = $_POST['phone'] ?? [];
+        $sexes  = $_POST['sex'] ?? [];
+        $ids    = $_POST['customer_id'] ?? [];
+
+        foreach($ids as $index => $id){                                 
+            if($id){ 
+                $this->customerlistModel->update($id, [
+                    'name' => $names[$index],
+                    'phone'=> $phones[$index],
+                    'sex'  => $sexes[$index],
+                    'status'=>1
+                ]);
+            } else {                                                     
+                $this->customerlistModel->insert([
+                    'id_book_tour' => $id_book_tour,
+                    'name' => $names[$index],
+                    'phone'=> $phones[$index],
+                    'sex'  => $sexes[$index],
+                    'status'=>1
+                ]);
+            }
+        }
+
+        // Chỉ cập nhật khách, không tạo thanh toán
+        header("Location:?action=comtomer_list&id={$id_book_tour}&msg=success");
+        exit;
+    }
+
+    // Xử lý tạo thanh toán riêng nếu người dùng nhấn nút Thanh toán
+    if(isset($_POST['insert_payment'])){
+        // --- CẬP NHẬT SỐ LƯỢNG VÀ TỔNG TIỀN TOUR ---
+        $book_tour->quantity = isset($_POST['quantity']) ? $_POST['quantity'] : $book_tour->quantity;
+        $book_tour->total_amount = isset($_POST['total_money']) ? $_POST['total_money'] : $book_tour->total_amount;
+        $this->booktourModel->update_price_total($book_tour);
+
+    // chỉ tạo bản ghi thanh toán
+        $pay1 = new Pay();
+        $pay1->date           = date('Y-m-d');
+        $pay1->payment_method = $_POST['payment_method'];
+        $pay1->amount_money   = $_POST['amount_money'];
+        $pay1->note           = $_POST['note_pay'] ?? '';
+        $pay1->id_book_tour   = $id_book_tour;
+        $pay1->status         = $_POST['status_pay'];; // chưa đủ
+        $this->payModel->create($pay1);
+
+        var_dump($pay1);
+
+        header("Location:?action=comtomer_list&id={$id_book_tour}&msg=success");
+        exit;
+    }
+
         include 'views/admin/booking_manager/tour_is_active/customer_list.php';
     }
 
@@ -361,7 +389,8 @@ class Booking_controller extends Base_Controller{
          $diary_list = $this->tourdiaryModel->getByDepartureSchedule($book_tour->id_departure_schedule);             // lấy nhật ký tour
          $departurescheduledetails_list = $this->departurescheduledetailsModel->get_all_departure_schedule_details($book_tour->id_departure_schedule);             // lấy lịch khởi hành chi tiết
          $departure_schedule=$this->departurescheduleModel->get_departure_schedule($book_tour->id_departure_schedule);
-         $tour_guide = $this->tourguideModel->find_tour_guide($id);  //HDV
+         $tour_guide = $this->tourguideModel->find_tour_guide($departure_schedule->id_tour_guide);  //HDV
+         $paid = $this->payModel->getTotalAmountByBooking($id);  //lấy tổng tiền đã trả
         
         include 'views/admin/booking_manager/tour_has_ended/detail.php';
     }

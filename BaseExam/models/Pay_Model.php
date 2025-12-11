@@ -65,25 +65,30 @@ public function getRevenueByMonth($year = null) {                 // doanh thu t
     }
 }
 
-    public function create($pay){
-        try {
-            $sql = "INSERT INTO `pay` (`id`, `date`, `payment_method`, `status`, `amount_money`, `note`, `id_book_tour`) 
-            VALUES (NULL, 
-            '".$pay->date."', 
-            '".$pay->payment_method."', 
-            '".$pay->status."', 
-            '".$pay->amount_money."', 
-            '".$pay->note."', 
-            '".$pay->id_book_tour."');";
+public function create($pay){
+    try {
+        $sql = "INSERT INTO `pay` 
+            (`date`, `payment_method`, `status`, `amount_money`, `note`, `id_book_tour`) 
+            VALUES (:date, :payment_method, :status, :amount_money, :note, :id_book_tour)";
 
-            $data = $this->pdo->exec($sql);
-            return $this->pdo->lastInsertId();
+        $stmt = $this->pdo->prepare($sql);
 
-        } catch (PDOException $e){
-            echo "Lỗi insert book_tour: " . $e->getMessage();
-            return false;
-        }
+        $stmt->execute([
+            ':date' => $pay->date,
+            ':payment_method' => $pay->payment_method,
+            ':status' => $pay->status,
+            ':amount_money' => $pay->amount_money,
+            ':note' => $pay->note ?? '',  // nếu note null thì dùng chuỗi rỗng
+            ':id_book_tour' => $pay->id_book_tour
+        ]);
+
+        return $this->pdo->lastInsertId();
+
+    } catch (PDOException $e){
+        echo "Lỗi insert pay: " . $e->getMessage();
+        return false;
     }
+}
 
 
         public function get_latest_pay($id_book_tour){   // lấy bản ghi mới nhất
@@ -148,6 +153,21 @@ public function getRevenueByMonth($year = null) {                 // doanh thu t
     }
 
 
+    public function getTotalAmountByBooking($id_book_tour) { // hàm tính tổng tiền của booking đã thanh toán theo id của từng booking
+    try {
+        $sql = "SELECT COALESCE(SUM(amount_money), 0) AS total_amount
+                FROM pay
+                WHERE id_book_tour = :id_book_tour";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id_book_tour' => $id_book_tour]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (float)($row['total_amount'] ?? 0);
+    } catch (PDOException $err) {
+        echo "Lỗi getTotalAmountByBooking: " . $err->getMessage();
+        return 0;
+    }
+}
 
     // public function amount_money_pay($id, $amount_money){        //cập nhật giá tiền đã thanh toán
     //     try{

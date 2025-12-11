@@ -127,6 +127,7 @@
             <!-- Thông tin thanh toán -->
             <div class="card">
                 <h4>Thông tin thanh toán</h4>
+                <h5 style="color:red;">Tổng thu: <?= number_format(round($paid), 0, '', '.') ?> VND</h5>
                 <table class="table table-hover">
                     <tr>
                         <th>Ngày thanh toán</th>
@@ -139,11 +140,17 @@
                         <td><?=$p->date?></td>
                         <td class="amount"><?=number_format($p->amount_money)?> VND</td>
                         <td><?= $p->payment_method == 1 ? 'Online' : 'Tiền mặt' ?></td>
-                        <td class="<?= $p->status == 2 ? 'status-green' : 'status-red' ?>">
-                            <?= $p->status == 2 ? 'Đã thanh toán đủ' : 'Chưa đủ' ?>
+                        <td>
+                            <?php if($p->status ==1):?>
+                                <p>Chưa đủ</p>
+                            <?php else :?>
+                                <p>Đã hoàn thành</p>
+                            <?php endif;?>
+                           
                         </td>
                     </tr>
                     <?php endforeach; ?>
+                    
                 </table>
             </div>
 

@@ -46,12 +46,12 @@ if (isset($_SESSION['user'])) {
       <a class="navbar-brand ms-2" href="?action=home_admin">Hệ thống quản lý</a>
 
       <!-- Ảnh đại diện -->
-       <div>
-          <label for="" style="color:white;">Xin chào <?=$user->name?>!</label>
-         <img src="<?= BASE_ASSETS_UPLOADS.$user->img ?>" 
-            alt="Ảnh đại diện" 
-            style="width:60px; height:60px; border-radius:50%; object-fit:cover; margin-right:50px;">
-        </div>
+      <div class="d-flex justify-content-center align-items-center" style="margin:0 30px;">
+          <label for="" style="color:white; margin-right: 15px;">Xin chào <?=$user->name?>!</label>
+          <img src="<?= BASE_ASSETS_UPLOADS.$user->img ?>" 
+              alt="Ảnh đại diện" 
+              style="width:60px; height:60px; border-radius:50%; object-fit:cover;">
+      </div>
   </nav>
   
   <!-- Sidebar -->
@@ -68,7 +68,7 @@ if (isset($_SESSION['user'])) {
  </a>
 
     <!-- Dropdown tài khoản -->
-    <div class="mt-3 px-3">
+    <!-- <div class="mt-3 px-3">
       <a class="dropdown-toggle text-white text-decoration-none" data-bs-toggle="collapse" href="#accountMenu">
         <i class="fa-solid fa-user"></i> Tài khoản
       </a>
@@ -77,7 +77,7 @@ if (isset($_SESSION['user'])) {
         <a href="?action=guide_registration">Đăng ký</a>
         <a href="?action=logout_admin" onclick="return confim('Bạn có chắc là muốn Đăng xuất không?')">Đăng xuất</a>
       </div>
-    </div>
+    </div> -->
   </div>
 
 

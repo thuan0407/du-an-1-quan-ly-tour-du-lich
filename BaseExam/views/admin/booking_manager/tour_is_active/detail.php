@@ -3,7 +3,7 @@
 $success = "";
 if (isset($_GET['msg'])) {
     if ($_GET['msg'] === 'success') {
-        $success = "Cập nhật HDV Thành công!";
+        $success = "Cập nhật Thành công!";
     }
 } 
 ?>
@@ -37,10 +37,8 @@ if (isset($_GET['msg'])) {
             <div class="row" style="padding:0 20px;">
                 <div class="col">
                     <h3 style="color:red;">Giá: <?=number_format($book_tour->total_amount,0,'','.')?>VND</h3>
-                    <div class="d-flex">
-                        <label for="">Đã cọc</label>
-                        <input style="width:300px;" type="number" name="amount_money_pay"  value="<?=$pay->amount_money?>" class="form-control">
-                    </div>
+
+
                     <label for="">Loại tour: <?=$tour_type->tour_type_name?></label> <br>
                     <label for="">Khu vực: <?=$tour->type_tour ==1 ?"Nội địa":"Ngoại địa"?></label><br><br>
 
@@ -133,14 +131,37 @@ if (isset($_GET['msg'])) {
                     </table>
                 </div><br>
 
+            
+                <!-- Cập nhật hoàn thiện thanh toán của tour -->
+                 <hr>
+                    <input type="text" name="note_pay" class="form-control" placeholder="Ghi chú"> <br>
+                
+                <div class="d-flex">
+                    <select name="payment_method" id="" class="form-control col">
+                        <option value="1">Online</option>
+                        <option value="2">Tiền mặt</option>
+                    </select>
+ 
+                    <input type="number" name="amount_money_pay" class="form-control col " placeholder="Nơi nhập tiền xử lý hủy hoặc kết thúc tour..">
+                     
 
-              <?php
-              if($departure_schedule->status == 1):?>
-                    <button class="btn btn-danger form-control" type="submit" name="cancel" onclick="return confirm('Bạn có chắc là muốn xóa chuyến tour này không?')">Hủy tour</button>
-                <?php else:?>
-                    <button class="btn btn-success form-control" type="submit">Không thể hủy</button>
-                <?php endif?>
-                    
+                </div>
+                
+
+
+           
+                    <div class="flex-fill">
+                        <?php if($departure_schedule->status == 1): ?>
+                            <button class="btn btn-danger w-100" type="submit" name="cancel" onclick="return confirm('Bạn có chắc là muốn xóa chuyến tour này không?')">
+                                Hủy tour
+                            </button>
+                        <?php else: ?>
+                            <button class="btn btn-success w-100" type="submit">
+                                Không thể hủy
+                            </button>
+                        <?php endif; ?>
+                    </div>
+
  
               
         </form>

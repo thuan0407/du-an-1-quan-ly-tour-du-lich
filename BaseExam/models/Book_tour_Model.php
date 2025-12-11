@@ -19,6 +19,9 @@ class Book_tour{
     public $amount_money;
     public $tour_scope;
     public $tour_minimum_scope;
+    public $pay_amount;
+    public $pay_date;
+
 }
 
 class Book_tour_Model extends BaseModel{
@@ -75,18 +78,45 @@ class Book_tour_Model extends BaseModel{
         }
     }
 
-
-    public function get_book_tour_all_125(){   //lấy các booktour có trạng thái là 1,2,5              
-        try{
+    // lấy bản ghi mới nhất của pay để hiển thị thông báo đã trả hết tiền hay chưa 
+    // lấy thông tin tour có id 1,2,5
+    public function get_book_tour_all_125() { 
+        try {
             $sql = "
-                SELECT MAX(p.status) AS pay_status, bk.*, t.name as tour_name,t.scope as tour_scope,t.minimum_scope as tour_minimum_scope,GROUP_CONCAT(i.img SEPARATOR '|') as images
-                FROM `book_tour` as bk
-                JOIN tour as t ON bk.id_tour = t.id
-                LEFT JOIN img_tour i ON t.id = i.id_tour
-                LEFT JOIN pay p ON p.id_book_tour = bk.id
+                SELECT 
+                    bk.*,
+                    t.name AS tour_name,
+                    t.scope AS tour_scope,
+                    t.minimum_scope AS tour_minimum_scope,
+
+                    -- Lấy ảnh qua subquery để không cần GROUP BY
+                    (SELECT GROUP_CONCAT(img SEPARATOR '|') 
+                    FROM img_tour 
+                    WHERE id_tour = t.id) AS images,
+
+                    -- Lấy bản ghi thanh toán mới nhất
+                    p.status AS pay_status,
+                    p.amount_money AS pay_amount,
+                    p.date AS pay_date
+
+                FROM book_tour bk
+                JOIN tour t ON bk.id_tour = t.id
+
+                -- Lấy đúng bản ghi mới nhất bằng ORDER + LIMIT 1
+                LEFT JOIN pay p 
+                    ON p.id = (
+                        SELECT p2.id 
+                        FROM pay p2 
+                        WHERE p2.id_book_tour = bk.id
+                        ORDER BY p2.id DESC
+                        LIMIT 1
+                    )
+
                 WHERE bk.status IN (1, 2, 5)
-                GROUP BY bk.id
+
+                ORDER BY bk.id DESC
             ";
+
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -94,6 +124,7 @@ class Book_tour_Model extends BaseModel{
             $list = [];
             foreach($data as $tt){
                 $book_tour = new Book_tour();
+
                 $book_tour->id                    = $tt['id'];
                 $book_tour->date                  = $tt['date'];
                 $book_tour->total_amount          = $tt['total_amount'];
@@ -107,11 +138,17 @@ class Book_tour_Model extends BaseModel{
                 $book_tour->number_of_nights      = $tt['number_of_nights'];
                 $book_tour->phone                 = $tt['phone'];
                 $book_tour->customername          = $tt['customername'];
+
                 $book_tour->tour_name             = $tt['tour_name'];
-                $book_tour->pay_status            = $tt['pay_status'];
                 $book_tour->tour_scope            = $tt['tour_scope'];
                 $book_tour->tour_minimum_scope    = $tt['tour_minimum_scope'];
-                $book_tour->images                = !empty($tt['images']) ? explode('|', $tt['images']) : [];
+
+                // thanh toán gần nhất
+                $book_tour->pay_status            = $tt['pay_status'];
+                $book_tour->pay_amount            = $tt['pay_amount'];
+                $book_tour->pay_date              = $tt['pay_date'];
+
+                $book_tour->images = !empty($tt['images']) ? explode('|', $tt['images']) : [];
 
                 $list[] = $book_tour;
             }
@@ -119,7 +156,7 @@ class Book_tour_Model extends BaseModel{
             return $list;
 
         } catch (PDOException $err) {
-            echo "Lỗi truy vấn sản phẩm: " . $err->getMessage();
+            echo "Lỗi truy vấn book_tour_all_125: " . $err->getMessage();
             return [];
         }
     }
@@ -423,6 +460,7 @@ public function update_book_tour($book_tour)
             return false;
         }
     }
+
     public function getPendingToursByGuide($guide_id)
     {
         $sql = "
@@ -444,6 +482,7 @@ public function update_book_tour($book_tour)
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function getBookTourDetail($id)
         {
             $sql = "SELECT 
