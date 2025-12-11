@@ -34,9 +34,9 @@ match ($action) {
 
     'pending_detail'  => (new Tour_guide_Controller)->pending_detail(),
 
-    'rollcall'  => (new Tour_guide_Controller)->rollcall(),
     'roll_call_form'  => (new Tour_guide_Controller)->roll_call_form(),
     'roll_call_update'  => (new Tour_guide_Controller)->roll_call_update(),
+    'rollcall_history_detail' => (new Tour_guide_Controller)->rollcall_history_detail(),
 
 
     //test set lich

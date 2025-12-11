@@ -131,5 +131,25 @@ public function delete_by_service_id($tour_id, $service_id) {
     ]);
 }
 
+
+
+
+
+//===========================code hùng============================
+
+public function getTourServices($id_tour)
+{
+    $sql = "SELECT ts.type_service AS service,
+                    s.name AS name_supplier,
+                    s.phone_number AS phone_supplier
+            FROM tour_supplier ts
+            JOIN supplier s ON s.id = ts.id_supplier
+            LEFT JOIN tour t ON t.id = ts.id_tour   
+            WHERE ts.id_tour = ?";
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->execute([$id_tour]);
+    return $stmt->fetchAll(PDO::FETCH_OBJ);
+}
+
 }
 ?>

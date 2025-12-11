@@ -97,7 +97,7 @@ class Booking_controller extends Base_Controller{
             //---- Tạo booking ----//
             $book_tour->date                    = date("Y-m-d");
             $book_tour->total_amount            = $_POST['total_amount'];
-            $book_tour->note                    = $_POST['departure_schedule_note'] ?? '';
+            $book_tour->note                    = $_POST['note_customer'] ?? '';
             $book_tour->status                  = 1;
             $book_tour->quantity                = $_POST['quantity'];
             $book_tour->id_departure_schedule   = $departureschedule_id;
@@ -167,13 +167,13 @@ class Booking_controller extends Base_Controller{
 
             $this->payModel->create($pay);   
             
-            // ------ Tạo yêu cầu đặc biệt
-            $special_request->date             = date("Y-m-d");
-            $special_request->content          = $_POST['content_spceail'];
-            $special_request->status           = 1;
-            $special_request->id_book_tour     = $book_tour_id;  
+            // // ------ Tạo yêu cầu đặc biệt
+            // $special_request->date             = date("Y-m-d");
+            // $special_request->content          = $_POST['content_spceail'];
+            // $special_request->status           = 1;
+            // $special_request->id_book_tour     = $book_tour_id;  
             
-            $this->specialrequestModel->create($special_request);
+            // $this->specialrequestModel->create($special_request);
 
            $success = "Đặt tour thành công!";
 
@@ -255,12 +255,7 @@ class Booking_controller extends Base_Controller{
         $book_tour_status      = 4;
         $update_book_tour      =$this->booktourModel->update_book_tour_status($id, $book_tour_status);                   //update lại bảng book tour
  
-        if($delete_contract>0 && $customer_list>0 && $delete_special_request>0 && $delete_departure_schedule_details>0 && $update_book_tour>0){
-            header("Location:?action=tour_is_active&msg=success");
-        }else{
-            header("Location:?action=tour_is_active&msg=error");
-        }
-
+        header("Location:?action=tour_is_active&msg=success");
         }
 
         if(isset($_POST['update_tour_guide'])){      //cập nhật hướng dẫn viên cho book tour
@@ -391,6 +386,10 @@ class Booking_controller extends Base_Controller{
          $departure_schedule=$this->departurescheduleModel->get_departure_schedule($book_tour->id_departure_schedule);
          $tour_guide = $this->tourguideModel->find_tour_guide($departure_schedule->id_tour_guide);  //HDV
          $paid = $this->payModel->getTotalAmountByBooking($id);  //lấy tổng tiền đã trả
+
+         
+         
+
         
         include 'views/admin/booking_manager/tour_has_ended/detail.php';
     }

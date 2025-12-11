@@ -10,8 +10,7 @@
   
   <select id="statusFilter">
     <option value="">Tất cả trạng thái</option>
-    <option value="1">Chuẩn bị</option>
-    <option value="2">Đang diễn ra</option>
+    <option value="2">Đang hoạt động</option>
     <option value="3">Đã kết thúc</option>
   </select>
 
@@ -31,10 +30,9 @@
     <th>Tên tour</th>
     <th>Ngày bắt đầu</th>
     <th>Ngày kết thúc</th>
-    <th>Ghi chú</th>
     <th>Điểm danh</th>
     <th>Chi tiết</th>
-     <th>Trạng thái</th>   <!-- (sắp diễn ra, đang diễn ra, đã kết thúc) -->
+    <th>Trạng thái</th>   <!-- (sắp diễn ra, đang diễn ra, đã kết thúc) -->
     <th>Xem nhật ký tour</th>
     <th>Yêu cầu đặc biệt</th> <!-- (đổi phòng, ăn chay, hỗ trợ sk, ...) -->
   </tr>
@@ -42,29 +40,15 @@
 
 <tbody>
   <?php 
-  $today = date('Y-m-d'); // ngày hiện tại
   foreach($schedules as $schedule): 
-
-    // Tự động cập nhật trạng thái dựa theo ngày
-    $auto_status = 1; // mặc định Chuẩn bị
-    if ($today >= $schedule->start_date && $today <= $schedule->end_date) {
-        $auto_status = 2; // Đang diễn ra
-    } elseif ($today > $schedule->end_date) {
-        $auto_status = 3; // Đã kết thúc
-    }
-
-    // Nếu HDV đã thay đổi status bằng select, dùng status trong CSDL
-    $status = $schedule->status ?? $auto_status;
-
   ?>
     <tr>
       <td><?= htmlspecialchars($schedule->tour_name ?? 'Chưa có tour') ?></td>
       <td><?= htmlspecialchars($schedule->start_date) ?></td>
       <td><?= htmlspecialchars($schedule->end_date) ?></td>
-      <td><?= htmlspecialchars($schedule->note) ?></td>
 
-      <td>
-    <a href="?action=rollcall&id_departure_schedule=<?= $schedule->id ?>" 
+    <td>
+    <a href="?action=roll_call_form&id_departure_schedule=<?= $schedule->id ?>" 
        class="button journal-btn" 
        style="background:#ff9800;">
        Điểm danh
@@ -78,15 +62,18 @@
         </a>
       </td>
 
-  <td class="status <?= $status == 1 ? 'status-preparing' : ($status == 2 ? 'status-ongoing' : 'status-finished') ?>">
-      <form method="POST" action="?action=update_schedule_status&id=<?= $schedule->id ?>">
-        <select name="status" onchange="this.form.submit()">
-            <option value="1" <?= $status == 1 ? 'selected' : '' ?>>Chuẩn bị</option>
-            <option value="2" <?= $status == 2 ? 'selected' : '' ?>>Đang diễn ra</option>
-            <option value="3" <?= $status == 3 ? 'selected' : '' ?>>Đã kết thúc</option>
-        </select>
-      </form>
-  </td>
+<td class="status <?= $schedule->st == 2 ? 'status-ongoing' : ($schedule->st == 3 ? 'status-finished' : 'status-preparing') ?>">
+    <?php 
+    if ($schedule->st == 2) {
+        echo "<span class='status-icon' style='color: #5cb85c;'>🟢 Đang hoạt động</span>";
+    } elseif ($schedule->st == 3) {
+        echo "<span class='status-icon' style='color: #ec3f3f;'>🟥 Đã kết thúc</span>";
+    } 
+    ?>
+</td>
+
+
+
 
 <td>
     <a href="?action=tour_diary&schedule_id=<?= $schedule->id ?>" class="button journal-btn">
@@ -95,7 +82,7 @@
 </td>
 
 <td>
-    <a href="?action=special_request_index&id_book_tour=<?= $schedule->id ?>" class="button request-btn">
+    <a href="?action=special_request_index&id_book_tour=<?= $schedule->id_book_tour ?>" class="button request-btn">
         Xem yêu cầu
     </a>
 </td>
@@ -110,6 +97,7 @@
 </div>
 
 <style>
+  
   .schedule-table a.button {
     display: inline-block;
     padding: 6px 12px;
@@ -128,7 +116,7 @@
 }
 
 .schedule-table a.journal-btn:hover {
-    background-color: #0c65c2;
+background-color: #0c65c2;
 }
 
 /* Nút Yêu cầu */
@@ -280,7 +268,7 @@
     .filter-container input[type="text"],
     .filter-container input[type="date"],
     .filter-container select {
-        width: 100%;
+width: 100%;
     }
 }
   /* reset lọc */
@@ -299,6 +287,64 @@
     background-color: #999;
     color: #fff;
 }
+/* Tối ưu toàn diện cho mobile */
+@media (max-width: 768px) {
+
+    /* Khoảng cách 2 bên */
+    .schedule-container {
+        padding: 10px;
+    }
+
+    /* Filter xếp 1 cột */
+    .filter-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .filter-container input,
+    .filter-container select,
+    .filter-container button {
+        width: 100%;
+        font-size: 16px;   /* Tăng kích thước cho dễ bấm */
+        padding: 12px;
+    }
+
+    /* Bảng cuộn ngang mượt hơn */
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .schedule-table {
+        min-width: 900px;  /* tránh table bị vỡ layout */
+    }
+
+    /* Tăng kích thước select trạng thái */
+    .status select {
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    /* Các nút trong bảng */
+    .schedule-table a.button {
+        padding: 10px;
+        font-size: 15px;
+        display: inline-block;
+        min-width: 90px;
+    }
+}
+
+/* Giao diện kiểu card cho điện thoại rất nhỏ */
+@media (max-width: 480px) {
+    .schedule-table th,
+    .schedule-table td {
+        padding: 8px;
+        font-size: 13px;
+    }
+}
+
 </style>
 
 
@@ -332,21 +378,13 @@ function filterTable() {
 
     Array.from(table.rows).forEach(row => {
         const tourName = row.cells[0].textContent.toLowerCase();
-        const status = row.cells[5].querySelector('select')?.value || '';
+        const statusText = row.cells[5].textContent.toLowerCase();
         const rowStartDate = row.cells[1].textContent; // cột start_date
         const rowEndDate = row.cells[2].textContent;   // cột end_date
 
         const matchSearch = tourName.includes(searchValue);
-        const matchStatus = !statusValue || status === statusValue;
-
-        let matchDate = true;
-        if (startDate && endDate) {
-            matchDate = (rowStartDate >= startDate && rowEndDate <= endDate);
-        } else if (startDate) {
-            matchDate = (rowStartDate >= startDate);
-        } else if (endDate) {
-            matchDate = (rowEndDate <= endDate);
-        }
+const matchStatus = !statusValue || statusText.includes(statusValue === "2" ? "đang hoạt động" : statusValue === "3" ? "đã kết thúc" : "");
+        const matchDate = (!startDate || rowStartDate >= startDate) && (!endDate || rowEndDate <= endDate);
 
         row.style.display = (matchSearch && matchStatus && matchDate) ? '' : 'none';
     });

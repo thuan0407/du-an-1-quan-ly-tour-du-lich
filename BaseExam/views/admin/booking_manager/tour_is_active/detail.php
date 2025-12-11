@@ -144,7 +144,6 @@ if (isset($_GET['msg'])) {
  
                     <input type="number" name="amount_money_pay" class="form-control col " placeholder="Nơi nhập tiền xử lý hủy hoặc kết thúc tour..">
                      
-
                 </div>
                 
 

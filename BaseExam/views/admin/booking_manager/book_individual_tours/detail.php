@@ -92,10 +92,10 @@
                     
                 </div>
 
-                <h4>Yêu cầu đặc biệt</h4>
+                <!-- <h4>Yêu cầu đặc biệt</h4>
                 <div>
                     <input type="text" name="content_spceail" class="form-control" placeholder="Nhập yêu cầu đặc biệt..." required><br>
-                </div>
+                </div> -->
 
                  <h4>Hướng dẫn viên</h4>
                 <div>

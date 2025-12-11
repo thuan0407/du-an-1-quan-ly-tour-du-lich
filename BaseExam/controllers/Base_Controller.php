@@ -42,6 +42,7 @@ class Base_Controller
     public $userModel;
     public $departurescheduledetailsModel;
     public $scheduledetailsModel;
+    public $rollcalldetailModel;
 
     public function __construct() {
         $this->addressModel            = new Address_Model();
@@ -63,6 +64,7 @@ class Base_Controller
         $this->userModel               = new User_Model();
         $this->departurescheduledetailsModel  = new Departure_schedule_details_Model();
         $this->scheduledetailsModel    = new Schedule_details_Model();
-    }
+        $this->rollcalldetaiModel      = new Roll_call_detail_Model();
+    }   
 
 }

@@ -86,7 +86,9 @@ public function getByGuide($guide_id) {
     try {
         $sql = "SELECT 
                     s.id, s.start_date, s.end_date, s.status, s.note, s.incidental_costs,
-                    t.name AS tour_name
+                    t.name AS tour_name,
+                    b.status AS st,
+                    b.id AS id_book_tour
                 FROM departure_schedule s
                 LEFT JOIN book_tour b 
                     ON s.id = b.id_departure_schedule 
@@ -135,6 +137,7 @@ public function getByGuide($guide_id) {
                         b.customername AS CusName,
                         b.phone AS CusPhone,
                         b.id AS book_id,
+                        b.note AS note,
                         b.quantity AS quantity
                     FROM departure_schedule s
                     LEFT JOIN book_tour b ON s.id = b.id_departure_schedule

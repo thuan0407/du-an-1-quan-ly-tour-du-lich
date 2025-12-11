@@ -217,7 +217,7 @@
                         <td><?=$dr->note?></td>
                         <td>
                             <?php if($dr->img): ?>
-                                <img src="<?=$dr->img?>" alt="ảnh">
+                                <img src="<?=BASE_ASSETS_UPLOADS .$dr->img?>" alt="ảnh" width="100">
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -240,6 +240,9 @@
                     </tr>
                     <?php endforeach; ?>
                 </table>
+
+                <!-- điểm danh -->
+    
             </div>
         </div>
     </div>

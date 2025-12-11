@@ -1,6 +1,6 @@
 <div class="schedule-container">
   <h2>➕ Thêm Yêu cầu đặc biệt</h2>
-
+  <?=var_dump($id_book_tour)?>
   <form id="specialForm" method="POST">
     <div class="form-group">
       <label for="date">Ngày:</label>
